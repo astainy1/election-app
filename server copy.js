@@ -1,41 +1,33 @@
-// Create a server that will listen to a port 
 // Create three routs:
     // Login - Get route
     // Login - Post route
-    // Dashboard - Get route
-// Use ejs as your file engine
+    // Dashboard route
 
 const express = require('express');
 const path = require('path');
-const port = 5000;
 const app = express();
+const port = 5000;
 
 app.use(express.static(path.join(__dirname, 'views')));
 app.set('views engine', 'ejs');
 
-// Login - Get route
-app.get('/login', (request, response) => {
+app.get('/', (request, response) => {
+    // response.send('<h2> Hello there! I am learning NodeJs at ODC. </h2>')
+    // response.sendFile(path.join(__dirname, 'public', 'login.ejs'));
     response.render('login.ejs');
 })
 
-// Login - Post route
 app.post('/login', (request, response) => {
     response.redirect('/dashboard');
 })
 
-// Dashboard - get route
 app.get('/dashboard', (request, response) => {
+    // response.sendFile(path.join(__dirname, 'public', 'dashboard.ejs'));
     response.render('dashboard.ejs')
 })
 
-//Listen to port
-app.listen(port, () =>{
-    console.log(`Http response! Status: Listening on port: ${port}`);
+app.listen(port, () => {
+    console.log(`Http response! Status: Listening on port ${port}`);
 })
-
-
-
-
-
 
 
