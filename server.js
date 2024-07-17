@@ -27,7 +27,7 @@ db.serialize(() => {
 
     db.run(`CREATE TABLE IF NOT EXISTS roles(user_Id INT AUTO_INCREMENT PRIMARY KEY,role VARCHAR(50) NOT NULL);`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS user(id  INT  AUTO_INCREMENT PRIMARY KEY,fname VARCHAR(50) NOT NULL,mname   VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,dob DATE    NOT NULL,role_id INT NOT NULL,photo BLOG NOT NULL)`);
+    db.run(`CREATE TABLE IF NOT EXISTS user(id  INT  AUTO_INCREMENT PRIMARY KEY,fname VARCHAR(50) NOT NULL,mname   VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,dob DATE NOT NULL,role_id INT NOT NULL,photo BLOG NOT NULL)`);
     
 //   db.run('CREATE TABLE lorem (info TEXT)')
 //   const stmt = db.prepare('INSERT INTO lorem VALUES (?)')
@@ -38,7 +38,7 @@ db.serialize(() => {
 
 //   stmt.finalize()
 
-  db.each('SELECT * FROM auth', (err, row) => {
+  db.each('SELECT * FROM user', (err, row) => {
     console.log(row)
   })
 })
