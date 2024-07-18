@@ -13,6 +13,9 @@ const app = express();
 app.use(express.static(path.join(__dirname, 'views')));
 app.set('views engine', 'ejs');
 
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/public', express.static('public'))
+
 const sqlite3 = require('sqlite3').verbose()
 const db = new sqlite3.Database('./election.db')
 
@@ -46,26 +49,36 @@ db.serialize(() => {
 db.close()
 
 
+//Registration - Get route
+app.get('/register', (request, response) => {
+    response.render('voter-registration.ejs');
+});
+
+//Registration - Post route
+app.post('/', (request, response) => {
+    response.redirect('/');
+});
 
 // Login - Get route
-app.get('/login', (request, response) => {
+app.get('/', (request, response) => {
     response.render('login.ejs');
-})
+});
 
 // Login - Post route
 app.post('/login', (request, response) => {
     response.redirect('/dashboard');
-})
+});
 
 // Dashboard - get route
 app.get('/dashboard', (request, response) => {
     response.render('dashboard.ejs')
-})
+});
+
 
 //Listen to port
 app.listen(port, () =>{
     console.log(`Http response! Status: Listening on port: ${port}`);
-})
+});
 
 
 
