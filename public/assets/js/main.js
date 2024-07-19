@@ -8,22 +8,22 @@ form = document.getElementById('form'),
 profileImg = document.getElementById('formFile'),
 submitBtn = document.getElementById('submit');
 
-document.addEventListener('DOMContentLoaded', () => {
-    submitBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const userInfo = {
+// document.addEventListener('DOMContentLoaded', () => {
+//     submitBtn.addEventListener('click', (e) => {
+//         // e.preventDefault();
+//     //     const userInfo = {
 
-            fName: fName.value,
-            mName : mName.value,
-            lName : lName.value,
-            dob : dob.value,
-            username : userName.value,
-            password : password.value,
-            profilePic : profileImg.value
-        }
+//     //         fName: fName.value,
+//     //         mName : mName.value,
+//     //         lName : lName.value,
+//     //         dob : dob.value,
+//     //         username : userName.value,
+//     //         password : password.value,
+//     //         profilePic : profileImg.value
+//     //     }
 
-        console.log(userInfo)
-    });
+//     //     console.log(userInfo)
+//     });
 
 
 
@@ -98,6 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
     
     })(jQuery);
-})
+// })
 
 
