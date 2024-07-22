@@ -2,6 +2,8 @@
 // Create three routs:
     // Login - Get route
     // Login - Post route
+    // Registration - Get route
+    // Registration - Post route
     // Dashboard - Get route
 // Use ejs as your file engine
 
@@ -23,16 +25,16 @@ const db = new sqlite3.Database('./election.db')
 let userInfo = []
 db.serialize(() => {
 
-    db.run( `CREATE TABLE IF NOT EXISTS auth (id INT AUTO_INCREMENT PRIMARY KEY,username VARCHAR(50) NOT NULL,user_Id INT NOT NULL);`);
+    db.run( `CREATE TABLE IF NOT EXISTS auth (id INTEGER PRIMARY KEY AUTOINCREMENT,username VARCHAR(50) NOT NULL,password VARCHAR(50) NOT NULL,user_id INTEGER NOT NULL);`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS candidates(id  INT AUTO_INCREMENT PRIMARY KEY,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,position_id VARCHAR(50) NOT NULL,party_id    VARCHAR(50) NOT NULL,photo BLOB NOT NULL);`);
+    db.run(`CREATE TABLE IF NOT EXISTS candidates(id  INTEGER PRIMARY KEY AUTOINCREMENT,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,position_id VARCHAR(50) NOT NULL,party_id    VARCHAR(50) NOT NULL,photo BLOB NOT NULL);`);
         
 
-    db.run(`CREATE TABLE IF NOT EXISTS parties(id INT AUTO_INCREMENT PRIMARY KEY,party VARCHAR(50) NOT NULL,logo BLOB NOT NULL);`);
+    db.run(`CREATE TABLE IF NOT EXISTS parties(id INTEGER PRIMARY KEY AUTOINCREMENT,party VARCHAR(50) NOT NULL,logo BLOB NOT NULL);`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS roles(user_Id INT AUTO_INCREMENT PRIMARY KEY,role VARCHAR(50) NOT NULL);`);
+    db.run(`CREATE TABLE IF NOT EXISTS roles(user_Id INTEGER PRIMARY KEY AUTOINCREMENT,role VARCHAR(50) NOT NULL);`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS user(id  INT  AUTO_INCREMENT PRIMARY KEY,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,dob DATE NOT NULL,photo BLOG NOT NULL)`);
+    db.run(`CREATE TABLE IF NOT EXISTS user(id  INTEGER  PRIMARY KEY AUTOINCREMENT,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,dob DATE NOT NULL,photo BLOG NOT NULL)`);
     
 //   db.run('CREATE TABLE lorem (info TEXT)')
 //   const stmt = db.prepare('INSERT INTO lorem VALUES (?)')
@@ -61,20 +63,38 @@ app.get('/register', (request, response) => {
 
 //Registration - Post route
 app.post('/', (request, response) => {
+    
     //Create a destructuring
-    const {fName, mName, lName, dob, photo} = request.body;
+    const {fName, mName, lName, dob, photo, username, password} = request.body;
+
     //Insert user information into user table
     const userInfo = 'INSERT INTO  user(fname,mname,lname,dob,photo) VALUES(?,?,?,?,?)';
     const userPersonData = [fName, mName, lName, dob, photo];
-    db.run(userInfo, userPersonData, (err) => {
+    
+    db.run(userInfo, userPersonData, function(err) {
         if(err){
             console.error(err.message);
         }
 
-        console.log(`New row inserted ${this.changes}`)
+        console.log(`New Data added into user table ${this.lastID}`);
+
+        const userId = this.lastID;
+        console.log('User Added ID', userId);
+        //Insert user information into auth table
+
+        // const lastIsertedId = last_insert_rowid();
+        const userLogDetail = `INSERT INTO auth(username, password, user_id) VALUES(?,?,?)`;
+        const userAuthData = [username, password, userId];
+        console.log('This is user', userAuthData);
+        
+        db.run(userLogDetail, userAuthData, (err) => {
+            if(err){
+                console.error(err.message);
+            }
+
+            console.log('Inserted')
+        })
     });
-
-
 
     response.redirect('/');
 });
@@ -99,7 +119,6 @@ app.post('/dashboard', (request, response) => {
 app.get('/dashboard', (request, response) => {
     response.render('dashboard.ejs')
 });
-
 
 //Listen to port
 app.listen(port, () =>{
