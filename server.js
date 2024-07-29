@@ -45,18 +45,27 @@ db.serialize(() => {
 
 //   stmt.finalize()
 
-
-  db.each('SELECT * FROM user', (err, row) => {
-    console.log(row)
-  })
+//   db.each('SELECT * FROM user', (err, row) => {
+//     console.log(row)
+//   })
 })
 
 // db.close()
 
 
 app.use(body.urlencoded({extended: true}));
+
 //Registration - Get route
 app.get('/register', (request, response) => {
+
+    const insertData = 'SELECT * FROM roles';
+
+    db.all(insertData, (err, row) => {
+        if(err){
+            console.error(err.message);
+        }
+        console.log(row);
+    });
 
     response.render('voter-registration.ejs');
 });
