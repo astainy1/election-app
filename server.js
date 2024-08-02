@@ -12,17 +12,19 @@ const path = require('path');
 const port = 5000;
 const app = express();
 const body = require('body-parser');
+const { Module } = require('module');
+
+//database connection
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('./election.db');
 
 app.use(express.static(path.join(__dirname, 'views')));
 app.set('views engine', 'ejs');
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.get('/public', express.static('public'))
+app.get('/public', express.static('public'));
 
-const sqlite3 = require('sqlite3').verbose()
-const db = new sqlite3.Database('./election.db')
-
-let userInfo = []
+//Serialize database
 db.serialize(() => {
 
     db.run( `CREATE TABLE IF NOT EXISTS auth (id INTEGER PRIMARY KEY AUTOINCREMENT,username VARCHAR(50) NOT NULL,password VARCHAR(50) NOT NULL,user_id INTEGER NOT NULL);`);
@@ -52,22 +54,28 @@ db.serialize(() => {
 
 // db.close()
 
-
 app.use(body.urlencoded({extended: true}));
 
 //Registration - Get route
 app.get('/register', (request, response) => {
 
-    const insertData = 'SELECT * FROM roles';
+    //query data from the roles table
+    const retrieveData = 'SELECT role FROM roles';
 
-    db.all(insertData, (err, row) => {
+    db.all(retrieveData,  (err, row) => {
         if(err){
             console.error(err.message);
         }
         console.log(row);
-    });
 
-    response.render('voter-registration.ejs');
+        // const roles = {
+        //     title: "Role",
+        //     items: ["Admin", "Candidate", "Voter"]
+        // };
+        // console.log(`${row.roles}`)
+        //render the queried data into the registratio form upon http response.
+        response.render('voter-registration.ejs', {model : row});
+    });
 });
 
 //Registration - Post route
@@ -131,7 +139,7 @@ app.get('/dashboard', (request, response) => {
 
 //Listen to port
 app.listen(port, () =>{
-    console.log(`Http response! Status: Listening on port: ${port}`);
+    console.log(`Http response! Status: Listening on port: ${port} (http://localhost:${port})`);
 });
 
 
