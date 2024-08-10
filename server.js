@@ -157,15 +157,15 @@ app.get('/dashboard', (request, response) => {
 
     const totalRegisteredVoters = 'SELECT id FROM user';
     const totalRegisteredVoters2 = 'SELECT SUM(fname) FROM user';
-    const totalRegisteredVoters3 = 'SELECT LAST_INSERT_ID()';
+    const totalRegisteredVoters3 = 'SELECT last_insert_rowid()';
 
-    db.run(totalRegisteredVoters3, (err) => {
+    db.run(totalRegisteredVoters3, (err, row) => {
 
         if(err){
             console.error(err.message);
         }
         
-        console.log(totalRegisteredVoters3)
+        console.log(row)
     })
 
     response.render('dashboard.ejs')
