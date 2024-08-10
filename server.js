@@ -109,7 +109,7 @@ app.post('/', (request, response) => {
                 console.error(err.message);
             }
 
-            console.log('Inserted')
+            console.log('Data Inserted into Table User')
         })
     });
 
@@ -155,7 +155,18 @@ app.post('/dashboard', (request, response) => {
 // Dashboard - get route
 app.get('/dashboard', (request, response) => {
 
-    const totalRegisteredVoters = 'SELECT id FROM '
+    const totalRegisteredVoters = 'SELECT id FROM user';
+    const totalRegisteredVoters2 = 'SELECT SUM(fname) FROM user';
+    const totalRegisteredVoters3 = 'SELECT LAST_INSERT_ID()';
+
+    db.run(totalRegisteredVoters3, (err) => {
+
+        if(err){
+            console.error(err.message);
+        }
+        
+        console.log(totalRegisteredVoters3)
+    })
 
     response.render('dashboard.ejs')
 });
