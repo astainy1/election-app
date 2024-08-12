@@ -1,6 +1,6 @@
 <%-include("_reg-header.ejs") -%>
 
-      <form action="/" method="post" role="form">
+      <form action="/" method="post" role="form" id="registrationForm">
           <!-- /.card-body -->
           <div class="card-body">
             <div class="form-group">
@@ -47,7 +47,7 @@
 
             <div class="form-group">
                 <div class="input-group">
-                    <select class="form-select" aria-label="Default select ">
+                    <select class="form-select" aria-label="Default select">
                         <option class="border border-secondary" selected>Select role</option>
                         <% for(const userRole of module) {%>
                         <option value="1"><%= userRole.role %></option>

@@ -14,12 +14,55 @@
 <!-- /.login-box -->
 
 <!-- jQuery -->
-<script src="./assets/vendor/plugins/jquery/jquery.min.js"></script>
+<script src="./assets/vendor/jquery/jquery.min.js"></script>
 <!-- Bootstrap 4 -->
-<script src="./assets/vendor/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="./assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE App -->
 <script src="./assets/vendor/dist/js/adminlte.min.js"></script>
 <!-- Font awesome -->
 <script src="https://kit.fontawesome.com/cd31aca100.js" crossorigin="anonymous"></script>
+<!-- jquery-validation -->
+<script src="./assets/vendor/jquery-validation/jquery.validate.min.js"></script>
+<script src="./assets/vendor/jquery-validation/additional-methods.min.js"></script>
+
+<!-- jQuery validation -->
+<script type="text/javascript">
+  $(document).ready(function () {
+    // $.validator.setDefaults({
+    //   submitHandler: function () {
+    //     location.href = "/dashboard"
+    //   }
+    // });
+    $('#loginForm').validate({
+      rules: {
+        username: {
+          required: true
+
+        },
+        password: {
+          required: true,
+          minlength: 8
+        }
+      },
+      messages: {
+        password: {
+          required: "Please provide a password",
+          minlength: "Your password must be at least 8 characters long"
+        }
+      },
+      errorElement: 'span',
+      errorPlacement: function (error, element) {
+        error.addClass('invalid-feedback');
+        element.closest('.form-group').append(error);
+      },
+      highlight: function (element, errorClass, validClass) {
+        $(element).addClass('is-invalid');
+      },
+      unhighlight: function (element, errorClass, validClass) {
+        $(element).removeClass('is-invalid');
+      }
+    });
+  });
+  </script>
 </body>
 </html>

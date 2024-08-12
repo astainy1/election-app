@@ -16,9 +16,13 @@
     "ejs": "^3.1.10",
     "express": "^4.19.2",
     "icons": "^1.0.0",
-    "nodemon": "^3.1.4",
     "path": "^0.12.7",
     "sql": "^0.78.0",
     "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "connect-livereload": "^0.6.1",
+    "livereload": "^0.9.3",
+    "nodemon": "^3.1.4"
   }
 }
