@@ -13,8 +13,16 @@ const port = 5000;
 const app = express();
 const body = require('body-parser');
 const { Module } = require('module');
+
+//Variables for password hashing in database
+const bcrypt = require('bcrypt');
+const saltRounds = 12;
+const myPlanTextPassword = "Passw0rd123";
+
+//Variable for refreshing web page upon change to code
 const liveReload = require('livereload');
 const connectLiveReload = require('connect-livereload');
+const { hash } = require('crypto');
 
 //database connection
 const sqlite3 = require('sqlite3').verbose();
@@ -49,7 +57,7 @@ db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS roles(user_Id INTEGER PRIMARY KEY AUTOINCREMENT,role VARCHAR(50) NOT NULL);`);
 
     // Insert into roles table
-    db.run(`INSERT INTO     roles (role) VALUES('Admin'), ('Candidate'), ('Voter')`)
+    db.run(`INSERT INTO     roles (role) VALUES('Admin'), ('Candidate'), ('Voter')`);
     db.run(
         `DELETE FROM roles
         WHERE rowid NOT IN (
@@ -118,20 +126,29 @@ app.post('/', (request, response) => {
 
         const userId = this.lastID;
         console.log('User Added ID', userId);
-        //Insert user information into auth table
 
-        // const lastIsertedId = last_insert_rowid();
+        //Insert user information into auth table
         const userLogDetail = `INSERT INTO auth(username, password, user_id) VALUES(?,?,?)`;
-        const userAuthData = [username, password, userId];
-        console.log('This is user', userAuthData);
-        
-        db.run(userLogDetail, userAuthData, (err) => {
+
+        //Hash user password
+        bcrypt.hash(password, saltRounds, (err, hash) => {
             if(err){
                 console.error(err.message);
+            }else{
+                        
+                const validPassword = hash; //Store hashed password 
+                const userAuthData = [username, validPassword, userId];
+                // console.log(validPassword);//log hash password
+                
+                db.run(userLogDetail, userAuthData, (err) => {
+                    if(err){
+                        console.error(err.message);
+                    }
+        
+                    console.log('Data Inserted into user and auth tables')
+                })
             }
-
-            console.log('Data Inserted into Table User')
-        })
+        })    
     });
 
     response.redirect('/');
@@ -163,41 +180,102 @@ app.post('/', (req, res) => {
 })
 
 // Login - Post route
+
 app.post('/dashboard', (request, response) => {
     const {username, password} = request.body;
-    const userName = request.body.username;
-    const userPassword = request.body.password;
-    const authData = `SELECT * FROM auth WHERE username = "${userName}" AND password = "${userPassword}"`;
-    // const authData = `SELECT username, password FROM auth`;
 
-    db.all(authData, (err, rows) => {
-        if(err){
+    //query to access username and prevent SQL injection
+    const authData = `SELECT username, password FROM auth WHERE username = ?`;
+
+    db.get(authData, [username], (err, row) => {
+        if (err) {
             console.error(err.message);
+            return response.status(500).send('Server error');
         }
-        rows.forEach( (row) => {
-            console.log(row.username)
-            // const dbUsername = row.username;
-            // const dbPassword = row.password;
 
-            if(userName === row.username && userPassword === row.password){
-                console.log('Login successful!');
-                return response.redirect('/dashboard');
-                
+        if (!row) {
+            // User not found
+            return response.status(401).send('Invalid username or password');
+        }
+
+        // Retrieve the stored hashed password from the database
+        const storedHash = row.password;
+
+        // Compare the entered password with the stored hash
+        bcrypt.compare(password, storedHash, (err, result) => {
+            if (err) {
+                console.error(err.message);
+                return response.status(500).send('Server error');
             }
-        
-            console.log('Login failed!');
-            return response.send('Login failed!');
-        })
-    })
-   
+
+            if (result) {
+                // Passwords match, authentication successful
+                console.log('Authentication successful');
+                return response.redirect('/dashboard');
+            } else {
+                // Passwords do not match
+                console.log('Password does not match');
+                return response.status(401).send('Invalid username or password');
+            }
+        });
+    });
 });
+
+// Serious error codes start
+
+    // app.post('/dashboard', (request, response) => {
+    //     const {username, password} = request.body;
+    //     const userName = request.body.username;
+    //     const userPassword = request.body.password;
+    //     let x;
+    //     let y;
+    //     //query user data from database and compare to entered data
+    //     const authData = `SELECT username, password FROM auth WHERE username = "${userName}" AND password = "${userPassword}"`;
+
+    //     db.all(authData, (err, rows) => {
+    //         if(err){
+    //             console.error(err.message);
+    //         }
+
+    //         rows.forEach( (row) => {
+    //             x = row.password;
+    //             y = row.username;
+
+    //             console.log(x, y)
+    //             // if(userName === row.username && userPassword === row.password){
+
+    //             // }else{
+
+    //             // }
+    //         });
+
+    //         const matchPassword = x;
+
+    //         //Compare hash password to login password
+    //         bcrypt.compare(matchPassword, hash, async function (err, result) {
+                
+    //             if(err){
+    //                 console.error(err.message)
+    //             }else{
+    //                 if(result){
+    //                     console.log('Result is: ', matchPassword)
+    //                 }else{
+    //                     console.log('Password does not match')
+    //                 }
+    //             }
+    //         })
+    //     })
+    
+    // });
+
+// Serious error code ends
 
 // Dashboard - get route
 app.get('/dashboard', (request, response) => {
 
     // Get total number of voters
-    const totalRegisteredVoters = 'SELECT id FROM user';
-    const totalRegisteredVoters2 = 'SELECT SUM(fname) FROM user';
+    // const totalRegisteredVoters = 'SELECT id FROM user';
+    // const totalRegisteredVoters2 = 'SELECT SUM(fname) FROM user';
     const totalRegisteredVoters3 = 'SELECT last_insert_rowid()';
 
     db.run(totalRegisteredVoters3, (err, row) => {

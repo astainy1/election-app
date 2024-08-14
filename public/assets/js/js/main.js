@@ -1,32 +1,16 @@
-const fName = document.getElementById('first_name'),
-mName = document.getElementById('middle_name'),
-lName = document.getElementById('last_name'),
-dob = document.getElementById('birthday'),
-userName = document.getElementById('username'),
-password = document.getElementById('password'),
-form = document.getElementById('form'),
-profileImg = document.getElementById('formFile'),
-submitBtn = document.getElementById('submit');
 
-// document.addEventListener('DOMContentLoaded', () => {
-//     submitBtn.addEventListener('click', (e) => {
-//         // e.preventDefault();
-//     //     const userInfo = {
+const inputImage = document.querySelector('.inputImage');
+const imageName = document.querySelector('.imageName');
 
-//     //         fName: fName.value,
-//     //         mName : mName.value,
-//     //         lName : lName.value,
-//     //         dob : dob.value,
-//     //         username : userName.value,
-//     //         password : password.value,
-//     //         profilePic : profileImg.value
-//     //     }
-
-//     //     console.log(userInfo)
-//     });
-
-
-
+document.addEventListener('DOMContentLoaded', () => {
+    inputImage.addEventListener('change', () => {
+        if(inputImage.files.length > 0){
+            imageName.textContent = inputImage.files[0].name
+        }else{
+            imageName.textContent = 'Choose image'
+        }
+    })
+})
 
     (function ($) {
         'use strict';
