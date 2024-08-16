@@ -14,7 +14,9 @@ const app = express();
 const body = require('body-parser');
 const flash = require('connect-flash');
 const session = require('express-session');
+const multer = require('multer');
 const { Module } = require('module');
+const fs = require('fs');
 
 //Variables for password hashing in database
 const bcrypt = require('bcrypt');
@@ -24,6 +26,8 @@ const saltRounds = 12;
 const liveReload = require('livereload');
 const connectLiveReload = require('connect-livereload');
 const { hash } = require('crypto');
+const { request } = require('http');
+const { errorMonitor } = require('events');
 
 //database connection
 const sqlite3 = require('sqlite3').verbose();
@@ -36,6 +40,7 @@ liveReloadServer.server.once('connection', () => {
         liveReloadServer.refresh('/');
     }, 100)
 });
+
 app.use(connectLiveReload());
 app.use(flash());
 app.use(express.static(path.join(__dirname, 'views')));
@@ -51,6 +56,15 @@ app.use(session({
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/public', express.static('public'));
 
+// Define the path to the 'uploads' directory
+const uploadsDir = path.join(__dirname, 'uploads');
+
+const upload = multer({desk: 'uploads/'})
+// Check if the directory exists, and create it if it does not
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    console.log('Uploads directory created');
+}
 //Serialize database
 db.serialize(() => {
 
@@ -72,7 +86,7 @@ db.serialize(() => {
         FROM roles
         GROUP BY role)`
     );
-    db.run(`CREATE TABLE IF NOT EXISTS user(id  INTEGER  PRIMARY KEY AUTOINCREMENT,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,dob DATE NOT NULL,photo BLOG NOT NULL)`);
+    db.run(`CREATE TABLE IF NOT EXISTS user(id  INTEGER  PRIMARY KEY AUTOINCREMENT,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,dob DATE NOT NULL,photo BLOG NOT NULL,role VARCHAR(50) NOT NULL)`);
     
 //   db.run('CREATE TABLE lorem (info TEXT)')
 //   const stmt = db.prepare('INSERT INTO lorem VALUES (?)')
@@ -104,34 +118,37 @@ app.get('/register', (request, response) => {
         }
         console.log(row);
 
-        // const roles = {
-        //     title: "Role",
-        //     items: ["Admin", "Candidate", "Voter"]
-        // };
-        // console.log(`${row.roles}`)
         //render the queried data into the registratio form upon http response.
-        response.render('register.ejs', {module : row});
+        response.render('register.ejs', {module : row, pageTitle : 'Register'});
     });
 });
 
 //Registration - Post route
-app.post('/', (request, response) => {
+app.post('/', upload.single('image'), (request, response) => {
     
     //Create a destructuring
-    const {fName, mName, lName, dob, photo, username, password} = request.body;
-
+    const {fName, mName, lName, dob, photo, role, username, password} = request.body;
+    const imagePath = request.file ? request.file.path : null;
+    //Read user data into the database
+    const image = imagePath ? fs.readFile(imagePath) : null;
     //Insert user information into user table
-    const userInfo = 'INSERT INTO  user(fname,mname,lname,dob,photo) VALUES(?,?,?,?,?)';
-    const userPersonalData = [fName, mName, lName, dob, photo];
+    const userInfo = 'INSERT INTO  user(fname,mname,lname,dob,photo,role) VALUES(?,?,?,?,?,?)';
+    const userPersonalData = [fName, mName, lName, dob, photo, role];
     
+    console.log(role);
     db.run(userInfo, userPersonalData, function(err) {
-        if(err){
-            console.error(err.message);
-        }
 
         console.log(`New Data added into user table ${this.lastID}`);
 
         const userId = this.lastID;
+
+        // Remove the temporary file
+        if(imagePath){
+            const image = fs.unlinkSync(imagePath);
+            }
+            if(err){
+                console.error(err.message);
+            }
 
         //Insert user information into auth table
         const userLoginDetail = `INSERT INTO auth(username, password, user_id) VALUES(?,?,?)`;
@@ -162,7 +179,7 @@ app.post('/', (request, response) => {
 
 //Forget password get route
 app.get('/forgot-password', (req, res) => {
-    res.render('forgot-password.ejs')
+    res.render('forgot-password.ejs', {pageTitle : 'Forgot Password'})
 });
 
 //Forget password post route
@@ -172,12 +189,12 @@ app.post('/recover-account', (req, res) => {
 
 // Login - Get route
 app.get('/', (request, response) => {
-    response.render('login.ejs', {errorMessage: ''});
+    response.render('login.ejs', {errorMessage: '', pageTitle : 'Login'});
 });
 
 //Recover Account - Get route
 app.get('/recover-account', (req, res) => {
-    res.render('recover-password.ejs');
+    res.render('recover-password.ejs', {pageTitle : 'Reset Password'});
 })
 
 //Recover Account - Post route
@@ -186,54 +203,59 @@ app.post('/', (req, res) => {
 })
 
 // Login - Post route
-app.post('/dashboard', (request, response) => {
-    const {username, password} = request.body;
+app.post('/dashboard', (req, res) => {
+    const { username, password } = req.body;
 
-    //query to access username and prevent SQL injection
-    const authData = `SELECT username, password FROM auth WHERE username = ?`;
+    // Query to access username and prevent SQL injection
+    const authData = `SELECT id, username, password FROM auth WHERE username = ?`;
 
     db.get(authData, [username], (err, row) => {
-
         if (err) {
             console.error(err.message);
-            const serverErrorMsg = 'Server error. Please try again later.'
-            return response.status(500).render('login.ejs', {errorMessage: serverErrorMsg});
+            return res.status(500).render('login.ejs', { errorMessage: 'Server error. Please try again later.', pageTitle : 'Login' });
         }
 
         if (!row) {
             // User not found
-            const invalidUser = 'User not found.'
-            return response.status(401).render('login.ejs', {errorMessage: invalidUser});
+            return res.status(401).render('login.ejs', { errorMessage: 'User not found.', pageTitle : 'Login' });
         }
 
         // Retrieve the stored hashed password from the database
-        const storedHash = row.password;
+        const storedHashedPwd = row.password;
 
-        // Compare the entered password with the stored hash
-        bcrypt.compare(password, storedHash, (err, result) => {
-
+        // Compare the entered password with the stored hashed password
+        bcrypt.compare(password, storedHashedPwd, (err, result) => {
             if (err) {
                 console.error(err.message);
-                const serverErrMsg = 'Server error.';
-                return response.status(500).render('login.ejs', {errorMessage: serverErrMsg});
+                return res.status(500).render('login.ejs', { errorMessage: 'Server error.', pageTitle : 'Login' });
             }
 
             if (result) {
                 // Passwords match
-                console.log('login successful');
 
-                const successMsg = "Login successful!"
-                console.log(username)
-                request.session.username = username;
-                return response.redirect('/dashboard');
+                // Store username in session
+                req.session.username = username;
+
+                // Retrieve the user's image from the images table
+                const userImageQuery = `SELECT photo FROM user WHERE id = ?`;
+
+                db.get(userImageQuery, [row.id], (err, imageRow) => {
+                    if (err) {
+                        return res.status(500).send('Error retrieving image');
+                    }
+
+                    console.log(imageRow)
+                    // Convert image BLOB to base64 for display
+                    const imageBase64 = imageRow ? imageRow : null;
+
+                    console.log(imageBase64)
+                    // Redirect to dashboard with image and username in query params
+                    // res.redirect(`/dashboard?username=${encodeURIComponent(username)}&image=${encodeURIComponent(imageBase64 || '')}`);
+                    res.redirect('/dashboard');
+                });
             } else {
                 // Passwords do not match
-                const errorMsg = 'Invalid password.';
-                console.log('Password does not match');
-
-                // request.flash('message', "Password does not match")
-                return response.status(401).render('login.ejs', {errorMessage: errorMsg});
-                
+                return res.status(401).render('login.ejs', { errorMessage: 'Invalid password.', pageTitle : 'Login' });
             }
         });
     });
@@ -241,16 +263,30 @@ app.post('/dashboard', (request, response) => {
 
 // Dashboard - get route
 app.get('/dashboard', (request, response) => {
+
+    //Query user image
     //Get username from session
     const loginUserName = request.session.username;
-    console.log(loginUserName)
 
     if(request.session.username){
-        response.render('dashboard.ejs', {LoginedUsername: request.session.username})
+        response.render('dashboard.ejs', {LoginedUsername: request.session.username, image: request.query.photo, pageTitle : '', moduleName : 'Dashboard'})
     }else{
-        console.log('Login failed!')
+        response.render('login.ejs', {errorMessage : 'Login failed! Please try again.', pageTitle : 'Login'})
     }
 });
+//Dashboard - get route ends
+
+//Contestants - get route starts
+app.get('/contestants', (request, response) => {
+    response.render('contestants.ejs', {LoginedUsername: request.session.username, image: request.query.photo, pageTitle : '', moduleName : 'Contestants'})
+});
+
+//Contestants - get route ends
+
+// Contestants - post route starts
+app.post('/contestnats', (request, response) => {
+    response.redirect('/contestants')
+})
 
 //Listen to port
 app.listen(port, () =>{

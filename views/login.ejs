@@ -1,6 +1,15 @@
-<%- include("_login-header.ejs") -%>
+<%- include("./extended-files/_auth-header.ejs") -%>
 
-</div>
+<body class="hold-transition login-page">
+  <div class="login-box">
+    <div class="login-logo">
+      <a href="/"><b>Voting</b> System</a>
+    </div>
+    <!-- /.login-logo -->
+    <div class="card shadow rounded-1">
+      <div class="card-body login-card-body p-4">
+        <p class="login-box-msg p-0 pt-3">Log in to start your session</p>
+  </div>
       <% if(errorMessage) {%>
       <span class="text-danger d-block text-center  p-0 "><%= errorMessage %></span>
       <%}%>
@@ -37,5 +46,64 @@
           <!-- /.col -->
         </div>
       </form>
+      <div class="social-auth-links text-center mb-3 pb-5">
+        <p class="mb-1">
+          <i>Forgot password? </i> <a href="/forgot-password">Reset</a>
+        </p>
+        <p class="mb-0">
+          <i>Don't have account? </i><a href="/register" class="text-center"> Register</a>
+        </p>
+      </div>
+      <!-- /.social-auth-links -->
+    </div>
+    <!-- /.login-card-body -->
+    </div>
+    </div>
+    <!-- /.login-box -->
 
-      <%- include("_login-footer.ejs") -%>
+<!-- jquery-validation -->
+<script src="./assets/vendor/jquery-validation/jquery.validate.min.js"></script>
+<script src="./assets/vendor/jquery-validation/additional-methods.min.js"></script>
+<script type="text/javascript">
+
+  // Login validation
+  $(document).ready(function () {
+  alert('connected')
+// $.validator.setDefaults({
+//   submitHandler: function () {
+//     location.href = "/dashboard"
+//   }
+// });
+  $('#loginForm').validate({
+      rules: {
+      username: {
+          required: true
+
+      },
+      password: {
+          required: true,
+          minlength: 8
+      }
+      },
+      messages: {
+      password: {
+          required: "Please provide a password",
+          minlength: "Your password must be at least 8 characters long"
+      }
+      },
+      errorElement: 'span',
+      errorPlacement: function (error, element) {
+      error.addClass('invalid-feedback');
+      element.closest('.form-group').append(error);
+      },
+      highlight: function (element, errorClass, validClass) {
+      $(element).addClass('is-invalid');
+      },
+      unhighlight: function (element, errorClass, validClass) {
+      $(element).removeClass('is-invalid');
+      }
+  });
+});
+// Login validation ends
+</script>
+      <%- include("./extended-files/_auth-footer.ejs") -%>

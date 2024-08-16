@@ -1,5 +1,16 @@
-<%-include("_reg-header.ejs") -%>
+<%-include("./extended-files/_auth-header.ejs") -%>
 
+<body class="hold-transition register-page" >
+  <div class=" col-xl-4 col-md-6 col-sm-12 ">
+    <!-- <div class="register-logo">
+      <a href="/register"><b>Voting</b> System</a>
+    </div> -->
+  
+    <div class="card-container card">
+      <div class="card-body register-card-body col-12">
+        <div class="text-center bg-secondary p-1">
+          <h3><b>Voting</b> System</h3>
+        </div>
       <form action="/" method="post" role="form" id="registrationForm">
           <!-- /.card-body -->
           <div class="card-body">
@@ -47,11 +58,11 @@
 
             <div class="form-group">
                 <div class="input-group">
-                    <select class="form-select" aria-label="Default select">
+                    <select name="role" class="form-select" aria-label="Default select">
                         <option class="border border-secondary" selected>Select role</option>
 
                         <% for(const userRole of module) {%>
-                        <option value="1"><%= userRole.role %></option>
+                        <option name="role"><%= userRole.role %></option>
                         <% } %>
 
                     </select>
@@ -66,5 +77,98 @@
           <!-- Form elements end! -->
 
       </form>
+      <div class="social-auth-links text-center">
+        Already have account? <a href="/" class="text-center">Login</a>
+        </div>
+    </div>
+    <!-- /.form-box -->
+    </div><!-- /.card -->
+    </div>
+    <!-- /.register-box -->
 
-<%- include("_reg-footer.ejs") -%>
+    <!-- jquery-validation -->
+<script src="./assets/vendor/jquery-validation/jquery.validate.min.js"></script>
+<script src="./assets/vendor/jquery-validation/additional-methods.min.js"></script>
+<script type="text/javascript">
+  //Registratoin validation start
+
+$(document).ready(function () {
+    // bsCustomFileInput.init();
+    // $.validator.setDefaults({
+    //   submitHandler: function () {
+    //     alert( "Form successful submitted!" );
+    //   }
+    // });
+    $('#registrationForm').validate({
+        rules: {
+
+        fName: {
+            required: true,
+            minlength: 2
+        },
+
+        lName: {
+            required: true,
+            minlength: 2
+        },
+
+        dob: {
+            required: true
+        },
+
+        username: {
+            required: true,
+            minlength: 3
+        },
+
+        password: {
+            required: true,
+            minlength: 8
+        },
+
+        photo: {
+            required: true
+        }
+
+        },
+
+        messages: {
+
+        fName: {
+            required: "Please provid your first name.",
+            minlength: "Invalid name."
+        },
+
+        mName: {
+            required: "Please provid your first name.",
+            minlength: "Invalid name."
+        },
+
+        lName: {
+            required: "Please provid your first name.",
+            minlength: "Invalid name"
+        },
+
+        password: {
+            required: "Please provide a password.",
+            minlength: "Your password must be at least 8 characters long."
+        }
+
+        },
+        errorElement: 'span',
+        errorPlacement: function (error, element) {
+        error.addClass('invalid-feedback');
+        element.closest('.form-group').append(error);
+        },
+        highlight: function (element, errorClass, validClass) {
+        $(element).addClass('is-invalid');
+        },
+        unhighlight: function (element, errorClass, validClass) {
+        $(element).removeClass('is-invalid');
+        }
+    });
+});
+
+//Registration validation starts
+</script>
+<%- include("./extended-files/_auth-footer.ejs") -%>
