@@ -53,18 +53,38 @@ app.use(session({
     resave: true
 }))
 
-app.use(express.static(path.join(__dirname, 'public')));
-app.get('/public', express.static('public'));
 
-// Define the path to the 'uploads' directory
 const uploadsDir = path.join(__dirname, 'uploads');
 
-const upload = multer({desk: 'uploads/'})
-// Check if the directory exists, and create it if it does not
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
     console.log('Uploads directory created');
 }
+
+
+// Set up multer for file uploads
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'uploads/');
+        },
+        filename: function (req, file, cb) {
+            cb(null, Date.now() + path.extname(file.originalname)); // Unique file name
+        }
+    })
+}); // form photo input field name
+
+//Serve static files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/public', express.static('public'));
+
+// Serve static files like images
+
+
+
+
 //Serialize database
 db.serialize(() => {
 
@@ -123,59 +143,53 @@ app.get('/register', (request, response) => {
     });
 });
 
-//Registration - Post route
-app.post('/', upload.single('image'), (request, response) => {
-    
-    //Create a destructuring
-    const {fName, mName, lName, dob, photo, role, username, password} = request.body;
+// Registration - Post route
+
+app.post('/', upload.single('photo'), (request, response) => {
+    const { fName, mName, lName, dob, role, username, password } = request.body;
     const imagePath = request.file ? request.file.path : null;
-    //Read user data into the database
-    const image = imagePath ? fs.readFile(imagePath) : null;
-    //Insert user information into user table
-    const userInfo = 'INSERT INTO  user(fname,mname,lname,dob,photo,role) VALUES(?,?,?,?,?,?)';
-    const userPersonalData = [fName, mName, lName, dob, photo, role];
-    
-    console.log(role);
+
+    // Insert user information into the user table
+    const userInfo = 'INSERT INTO user (fname, mname, lname, dob, photo, role) VALUES (?, ?, ?, ?, ?, ?)';
+    const userPersonalData = [fName, mName, lName, dob, imagePath, role];
+
+    if (!request.file) {
+        return response.status(400).send('No file received. Please try again.');
+    } console.log('File received:', request.file);
+
     db.run(userInfo, userPersonalData, function(err) {
+        if (err) {
+            console.error(err.message);
+            return response.status(500).send('Database error. Please try again later.');
+        }
 
-        console.log(`New Data added into user table ${this.lastID}`);
+        console.log(`New Data added into user table with ID: ${this.lastID}`);
 
-        const userId = this.lastID;
-
-        // Remove the temporary file
-        if(imagePath){
-            const image = fs.unlinkSync(imagePath);
-            }
-            if(err){
-                console.error(err.message);
-            }
-
-        //Insert user information into auth table
-        const userLoginDetail = `INSERT INTO auth(username, password, user_id) VALUES(?,?,?)`;
-
-        //Hash user password
-        bcrypt.hash(password, saltRounds, (err, hash) => {
-            if(err){
-                console.error(err.message);
-            }else{
-                        
-                const validPassword = hash; //Store hashed password 
-                const userAuthData = [username, validPassword, userId];
-                // console.log(validPassword);//log hash password
-                
-                db.run(userLoginDetail, userAuthData, (err) => {
-                    if(err){
-                        console.error(err.message);
-                    }
+        // Insert user information into auth table
+        const userLoginDetail = 'INSERT INTO auth (username, password, user_id) VALUES (?, ?, ?)';
         
-                    console.log('Data Inserted into user and auth tables')
-                })
+        // Hash user password
+        bcrypt.hash(password, saltRounds, (err, hash) => {
+            if (err) {
+                console.error(err.message);
+                return response.status(500).send('Error hashing password.');
             }
-        })    
-    });
 
-    response.redirect('/');
+            const userAuthData = [username, hash, this.lastID];
+
+            db.run(userLoginDetail, userAuthData, (err) => {
+                if (err) {
+                    console.error(err.message);
+                    return response.status(500).send('Database error. Please try again later.');
+                }
+
+                console.log('Data Inserted into user and auth tables');
+                response.redirect('/');
+            });
+        });
+    });
 });
+
 
 //Forget password get route
 app.get('/forgot-password', (req, res) => {
@@ -202,6 +216,8 @@ app.post('/', (req, res) => {
     res.redirect('/');
 })
 
+
+// Login - Post route
 // Login - Post route
 app.post('/dashboard', (req, res) => {
     const { username, password } = req.body;
@@ -212,12 +228,12 @@ app.post('/dashboard', (req, res) => {
     db.get(authData, [username], (err, row) => {
         if (err) {
             console.error(err.message);
-            return res.status(500).render('login.ejs', { errorMessage: 'Server error. Please try again later.', pageTitle : 'Login' });
+            return res.status(500).render('login.ejs', { errorMessage: 'Server error. Please try again later.', pageTitle: 'Login' });
         }
 
         if (!row) {
             // User not found
-            return res.status(401).render('login.ejs', { errorMessage: 'User not found.', pageTitle : 'Login' });
+            return res.status(401).render('login.ejs', { errorMessage: 'User not found.', pageTitle: 'Login' });
         }
 
         // Retrieve the stored hashed password from the database
@@ -227,7 +243,7 @@ app.post('/dashboard', (req, res) => {
         bcrypt.compare(password, storedHashedPwd, (err, result) => {
             if (err) {
                 console.error(err.message);
-                return res.status(500).render('login.ejs', { errorMessage: 'Server error.', pageTitle : 'Login' });
+                return res.status(500).render('login.ejs', { errorMessage: 'Server error.', pageTitle: 'Login' });
             }
 
             if (result) {
@@ -236,45 +252,50 @@ app.post('/dashboard', (req, res) => {
                 // Store username in session
                 req.session.username = username;
 
-                // Retrieve the user's image from the images table
+                // Retrieve the user's image path from the user table
                 const userImageQuery = `SELECT photo FROM user WHERE id = ?`;
 
                 db.get(userImageQuery, [row.id], (err, imageRow) => {
                     if (err) {
+                        console.error(err.message);
                         return res.status(500).send('Error retrieving image');
                     }
 
-                    console.log(imageRow)
-                    // Convert image BLOB to base64 for display
-                    const imageBase64 = imageRow ? imageRow : null;
+                    // Get the image path from the database
+                    const imagePath = imageRow ? imageRow.photo : null;
 
-                    console.log(imageBase64)
-                    // Redirect to dashboard with image and username in query params
-                    // res.redirect(`/dashboard?username=${encodeURIComponent(username)}&image=${encodeURIComponent(imageBase64 || '')}`);
+                    // Store the image path in the session
+                    req.session.imagePath = imagePath;
+
+                    // Redirect to the dashboard
                     res.redirect('/dashboard');
                 });
             } else {
                 // Passwords do not match
-                return res.status(401).render('login.ejs', { errorMessage: 'Invalid password.', pageTitle : 'Login' });
+                return res.status(401).render('login.ejs', { errorMessage: 'Invalid password.', pageTitle: 'Login' });
             }
         });
     });
 });
 
-// Dashboard - get route
+
+
+// Dashboard - GET route
 app.get('/dashboard', (request, response) => {
-
-    //Query user image
-    //Get username from session
-    const loginUserName = request.session.username;
-
-    if(request.session.username){
-        response.render('dashboard.ejs', {LoginedUsername: request.session.username, image: request.query.photo, pageTitle : '', moduleName : 'Dashboard'})
-    }else{
-        response.render('login.ejs', {errorMessage : 'Login failed! Please try again.', pageTitle : 'Login'})
+    // Get username and image path from session
+    const username = request.session.username;
+    const imagePath = request.session.imagePath; // Retrieve the image path from session
+    
+    if (username) {
+        // Render the dashboard page with user data
+        response.render('dashboard.ejs', { LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard'});
+    } else {
+        // Redirect to login if user is not authenticated
+        response.render('login.ejs', {errorMessage: 'Login failed! Please try again.', pageTitle: 'Login' 
+        });
     }
 });
-//Dashboard - get route ends
+
 
 //Contestants - get route starts
 app.get('/contestants', (request, response) => {

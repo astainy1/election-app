@@ -73,86 +73,83 @@
     <!-- jquery-validation -->
 <script src="./assets/vendor/jquery-validation/jquery.validate.min.js"></script>
 <script src="./assets/vendor/jquery-validation/additional-methods.min.js"></script>
+<!--  jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!--  jQuery Validation Plugin -->
+<script src="https://cdn.jsdelivr.net/jquery.validation/1.19.5/jquery.validate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/jquery.validation/1.19.5/additional-methods.min.js"></script>
 <script type="text/javascript">
-  //Registratoin validation start
 
-$(document).ready(function () {
-    // bsCustomFileInput.init();
-    // $.validator.setDefaults({
-    //   submitHandler: function () {
-    //     alert( "Form successful submitted!" );
-    //   }
-    // });
-    $('#registrationForm').validate({
-        rules: {
-
-        fName: {
-            required: true,
-            minlength: 2
-        },
-
-        lName: {
-            required: true,
-            minlength: 2
-        },
-
-        dob: {
-            required: true
-        },
-
-        username: {
-            required: true,
-            minlength: 3
-        },
-
-        password: {
-            required: true,
-            minlength: 8
-        },
-
-        photo: {
-            required: true
-        }
-
-        },
-
-        messages: {
-
-        fName: {
-            required: "Please provid your first name.",
-            minlength: "Invalid name."
-        },
-
-        mName: {
-            required: "Please provid your first name.",
-            minlength: "Invalid name."
-        },
-
-        lName: {
-            required: "Please provid your first name.",
-            minlength: "Invalid name"
-        },
-
-        password: {
-            required: "Please provide a password.",
-            minlength: "Your password must be at least 8 characters long."
-        }
-
-        },
-        errorElement: 'span',
-        errorPlacement: function (error, element) {
-        error.addClass('invalid-feedback');
-        element.closest('.form-group').append(error);
-        },
-        highlight: function (element, errorClass, validClass) {
-        $(element).addClass('is-invalid');
-        },
-        unhighlight: function (element, errorClass, validClass) {
-        $(element).removeClass('is-invalid');
-        }
-    });
-});
-
-//Registration validation starts
-</script>
+  $(document).ready(function () {
+      $('#registrationForm').validate({
+          rules: {
+              fName: {
+                  required: true,
+                  minlength: 2
+              },
+              mName: {
+                  required: false, // Optional field
+                  minlength: 2
+              },
+              lName: {
+                  required: true,
+                  minlength: 2
+              },
+              dob: {
+                  required: true
+              },
+              username: {
+                  required: true,
+                  minlength: 3
+              },
+              password: {
+                  required: true,
+                  minlength: 8
+              },
+              photo: {
+                  required: false // Optional field
+              }
+          },
+          messages: {
+              fName: {
+                  required: "Please provide your first name.",
+                  minlength: "Your first name must be at least 2 characters long."
+              },
+              mName: {
+                  minlength: "Your middle name must be at least 2 characters long."
+              },
+              lName: {
+                  required: "Please provide your last name.",
+                  minlength: "Your last name must be at least 2 characters long."
+              },
+              dob: {
+                  required: "Please provide your date of birth."
+              },
+              username: {
+                  required: "Please provide a username.",
+                  minlength: "Your username must be at least 3 characters long."
+              },
+              password: {
+                  required: "Please provide a password.",
+                  minlength: "Your password must be at least 8 characters long."
+              },
+              photo: {
+                  required: "Please upload a photo." // Optional field message
+              }
+          },
+          errorElement: 'span',
+          errorPlacement: function (error, element) {
+              error.addClass('invalid-feedback');
+              element.closest('.form-group').append(error);
+          },
+          highlight: function (element, errorClass, validClass) {
+              $(element).addClass('is-invalid');
+          },
+          unhighlight: function (element, errorClass, validClass) {
+              $(element).removeClass('is-invalid');
+          }
+      });
+  });
+  </script>
+  
 <%- include("./extended-files/_dashboard-footer.ejs")-%>

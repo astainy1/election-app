@@ -1,4 +1,4 @@
-// alert('connected successfully')
+
 const inputImage = document.querySelector('.inputImage');
 const imageName = document.querySelector('.imageName');
 
@@ -75,6 +75,7 @@ const imageName = document.querySelector('.imageName');
 
 //display image name uponload
 document.addEventListener('DOMContentLoaded', () => {
+    
     inputImage.addEventListener('change', () => {
         if(inputImage.files.length > 0){
             imageName.textContent = inputImage.files[0].name
