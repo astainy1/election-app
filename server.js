@@ -106,7 +106,7 @@ db.serialize(() => {
         FROM roles
         GROUP BY role)`
     );
-    db.run(`CREATE TABLE IF NOT EXISTS user(id  INTEGER  PRIMARY KEY AUTOINCREMENT,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,dob DATE NOT NULL,photo BLOG NOT NULL,role VARCHAR(50) NOT NULL)`);
+    db.run(`CREATE TABLE IF NOT EXISTS user(id  INTEGER  PRIMARY KEY AUTOINCREMENT,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,dob DATE NOT NULL,photo BLOG NOT NULL,role VARCHAR(50) NOT NULL, voted)`);
     
 //   db.run('CREATE TABLE lorem (info TEXT)')
 //   const stmt = db.prepare('INSERT INTO lorem VALUES (?)')
@@ -128,23 +128,20 @@ app.use(body.urlencoded({extended: true}));
 
 //Registration - Get route
 app.get('/register', (request, response) => {
-
-    //query data from the roles table
-    const retrieveData = 'SELECT role FROM roles';
-
-    db.all(retrieveData,  (err, row) => {
+    //query all role from roles table
+    const userRole = `SELECT role FROM roles`
+    db.all(userRole, (err, row) =>{
         if(err){
             console.error(err.message);
-        }
-        console.log(row);
+        }else{
 
-        //render the queried data into the registratio form upon http response.
-        response.render('register.ejs', {module : row, pageTitle : 'Register'});
-    });
+            response.render('voter-registration.ejs', {module : row, errorMessage: '', pageTitle : 'Register'});
+        }
+    })
+    //render the queried data into the registratio form upon http response.
 });
 
 // Registration - Post route
-
 app.post('/', upload.single('photo'), (request, response) => {
     const { fName, mName, lName, dob, role, username, password } = request.body;
     const imagePath = request.file ? request.file.path : null;
@@ -154,7 +151,7 @@ app.post('/', upload.single('photo'), (request, response) => {
     const userPersonalData = [fName, mName, lName, dob, imagePath, role];
 
     if (!request.file) {
-        return response.status(400).send('No file received. Please try again.');
+        return response.status(400).send(`<h1>No file received. Please try again.</h1>`);
     } console.log('File received:', request.file);
 
     db.run(userInfo, userPersonalData, function(err) {
@@ -172,7 +169,7 @@ app.post('/', upload.single('photo'), (request, response) => {
         bcrypt.hash(password, saltRounds, (err, hash) => {
             if (err) {
                 console.error(err.message);
-                return response.status(500).send('Error hashing password.');
+                return response.status(500).render('voter-registration.ejs', {errorMessage: 'Error hashing password.', pageTitle : 'register'});
             }
 
             const userAuthData = [username, hash, this.lastID];
@@ -180,11 +177,29 @@ app.post('/', upload.single('photo'), (request, response) => {
             db.run(userLoginDetail, userAuthData, (err) => {
                 if (err) {
                     console.error(err.message);
-                    return response.status(500).send('Database error. Please try again later.');
+                    return response.status(500).render('voter-registration.ejs', {errorMessage: 'Database error. Please try again later.', pageTitle : 'register'});
+                }
+                if(fName === '' || fName === null){
+
+                    console.log(fName);
+                    return response.render('voter-registration.ejs', {errorMessage: 'Please check you input fields.', pageTitle : 'register'})
+                }
+                else if(dob === '' || dob === null){
+
+                    console.log(dob);
+                    return response.render('voter-registration.ejs', {errorMessage: 'Please check you input fields.', pageTitle : 'register'})
+                }
+                else if(password.length === '' || mName === null){
+
+                    console.log(mName);
+                    return response.render('voter-registration.ejs', {errorMessage: 'Please check you input fields.', pageTitle : 'register'})
                 }
 
-                console.log('Data Inserted into user and auth tables');
-                response.redirect('/');
+                else{
+
+                    console.log('Data Inserted into user and auth tables');
+                    response.redirect('/');
+                }
             });
         });
     });
@@ -218,9 +233,8 @@ app.post('/', (req, res) => {
 
 
 // Login - Post route
-// Login - Post route
 app.post('/dashboard', (req, res) => {
-    const { username, password } = req.body;
+    const { role, username, password } = req.body;
 
     // Query to access username and prevent SQL injection
     const authData = `SELECT id, username, password FROM auth WHERE username = ?`;
@@ -267,8 +281,38 @@ app.post('/dashboard', (req, res) => {
                     // Store the image path in the session
                     req.session.imagePath = imagePath;
 
-                    // Redirect to the dashboard
-                    res.redirect('/dashboard');
+                    //Retrive user role from role table
+                    const activeUserRole = 'SELECT role FROM user WHERE id = ?';
+                    
+                    db.get(activeUserRole, [row.id], (err, roleResult) => {
+
+                        if(err){
+                            console.error(err.message);
+                        }
+                        if(roleResult.role === 'Admin'){
+
+                            console.log('Admin has loggedin!')
+
+                            // Redirect to admin dashboard
+                            res.redirect('/dashboard');
+
+                        }else if(roleResult.role === 'Candidate'){
+
+                            console.log('Candidate has logged in')
+                            res.render('candidate-dashboard.ejs', {LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard', message: 'Welcome to Candidate dashboard', pageTitle: 'Dashboard'});
+
+                        }else if(roleResult.role === 'Voter'){
+
+                            console.log('Voter has logged in!')
+                            res.render('vote.ejs', {LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard', message: 'Welcome to Voter dashboard', pageTitle: 'Dashboard'})
+
+                        }else{
+
+                            res.render('login.ejs', {errorMessage: 'Role was not selected!', pageTitle: 'Login'})
+
+                        }
+                    })
+ 
                 });
             } else {
                 // Passwords do not match
@@ -278,17 +322,28 @@ app.post('/dashboard', (req, res) => {
     });
 });
 
-
-
-// Dashboard - GET route
+// Admin Dashboard - GET route
 app.get('/dashboard', (request, response) => {
+
     // Get username and image path from session
     const username = request.session.username;
     const imagePath = request.session.imagePath; // Retrieve the image path from session
     
     if (username) {
+ //query the total number of voter from role column in user table
+        const retrieveData = `SELECT COUNT(*) AS total_voters FROM user WHERE role = 'Voter'`; 
+        db.get(retrieveData, [], (err, row) => {
+            if(err){
+                console.error('Error counting role: ', err.message);
+            }
+            if(row){
+                const userDashboard = 'Admin Electorial Dashboard'
+                console.log('Total voters: ', row.total_voters);
+                response.render('admin-dashboard.ejs', {message: userDashboard, totalVotes: row, LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard'});
+            }
+        });
+
         // Render the dashboard page with user data
-        response.render('dashboard.ejs', { LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard'});
     } else {
         // Redirect to login if user is not authenticated
         response.render('login.ejs', {errorMessage: 'Login failed! Please try again.', pageTitle: 'Login' 
@@ -296,10 +351,24 @@ app.get('/dashboard', (request, response) => {
     }
 });
 
+//voter - Get route
+app.get('/voter', (request, response) => {
+    response.send('Welcome to voter dashboard');
+});
+
+//Candidate - Get route
+app.get('/candidate', (request, response) => {
+    response.send('Welcome to candidate dashboard')
+})
+
 
 //Contestants - get route starts
 app.get('/contestants', (request, response) => {
-    response.render('contestants.ejs', {LoginedUsername: request.session.username, image: request.query.photo, pageTitle : '', moduleName : 'Contestants'})
+
+    //Get image path
+    const imagePath = request.session.imagePath;
+
+    response.render('contestants.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'})
 });
 
 //Contestants - get route ends
@@ -307,6 +376,19 @@ app.get('/contestants', (request, response) => {
 // Contestants - post route starts
 app.post('/contestnats', (request, response) => {
     response.redirect('/contestants')
+});
+
+//Party registration - Get Route
+app.get('/party', (request, response) => {
+    //Get image path
+    const imagePath = request.session.imagePath;
+
+    response.render('party-registration.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'})
+});
+
+//Party registration - Post Route
+app.post('/party', (request, response) => {
+    response.redirect('/party')
 })
 
 //Listen to port

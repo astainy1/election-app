@@ -36,7 +36,12 @@
         <div class="text-center bg-secondary p-1">
           <h3><b>Voting</b> System</h3>
         </div>
-      <form action="/" method="post" role="form" id="registrationForm" enctype="multipart/form-data">
+        
+        
+        <form action="/" method="post" role="form" id="registrationForm" enctype="multipart/form-data">
+          <% if(errorMessage) { %>
+            <span class="text-danger d-block text-center mt-2 p-0 "><%= errorMessage %></span> 
+          <% } %>
           <!-- /.card-body -->
           <div class="card-body">
             <div class="form-group">

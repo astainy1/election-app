@@ -1,11 +1,11 @@
-<%- include("./extended-files/_dashboard-header.ejs") -%>
+<%- include("./extended-files/_admin-dashboard-header.ejs") -%>
 
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
 
                     <!-- Page Heading -->
                     <div class=" row  d-sm-flex align-items-center justify-content-between mb-4 text-center">
-                        <h1 class=" col-12 h2 ml-4 mb-1 font-weight-bolder text-gray-900 text-uppercase text-center">Electorial Dashboard</h1>
+                        <h1 class=" col-12 h2 ml-4 mb-1 font-weight-bolder text-gray-900 text-uppercase text-center"><%= message %></h1>
                     </div>
 
                     <!-- Content Row -->
@@ -25,7 +25,9 @@
                                             </div>
                                         </div>
                                             <div class="h2 mb-0 font-weight-bolder text-gray-900">
-                                                <h5 class="font-weight-bold h1 fs-5">20</h5>
+                                                <% if(totalVotes) { %>
+                                                <h5 class="font-weight-bold h1 fs-5"><%= totalVotes.total_voters %></h5>
+                                                <% } %>
                                             </div>
                                     </div>
                                     <h4 class="h5 col-sm-h6 mt-3">Total number of registered voters</h4>
@@ -270,7 +272,5 @@
 
             </div>
             <!-- End of Main Content -->
-
-           
 
  <%- include("./extended-files/_dashboard-footer.ejs") -%>

@@ -35,9 +35,9 @@
       <div class="card-body login-card-body p-4">
         <p class="login-box-msg p-0 pt-3">Log in to start your session</p>
   </div>
-      <% if(errorMessage) {%>
+      <% if(errorMessage) { %>
       <span class="text-danger d-block text-center  p-0 "><%= errorMessage %></span>
-      <%}%>
+      <% } %>
       <form action="/dashboard" method="post" class="p-5" id="loginForm" role="form">
         <div class="input-group mb-3 form-group">
           <input type="text" name="username" class="form-control" placeholder="Username">
