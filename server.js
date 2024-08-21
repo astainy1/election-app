@@ -53,7 +53,7 @@ app.use(session({
     resave: true
 }))
 
-
+//Create upload directory if not exist
 const uploadsDir = path.join(__dirname, 'uploads');
 
 if (!fs.existsSync(uploadsDir)) {
@@ -61,8 +61,13 @@ if (!fs.existsSync(uploadsDir)) {
     console.log('Uploads directory created');
 }
 
-
-// Set up multer for file uploads
+//Create contestants directory if not exist in upload directory
+const contestantsDir = path.join(__dirname, 'uploads/contestants');
+if(!fs.existsSync(contestantsDir)){
+    fs.mkdirSync(contestantsDir, { recursive: true });
+    console.log('contestants directory is created')
+}
+// Set up multer for file uploads from voter registration form
 const upload = multer({
     storage: multer.diskStorage({
         destination: function (req, file, cb) {
@@ -74,8 +79,21 @@ const upload = multer({
     })
 }); // form photo input field name
 
+//Set up multer of file uploads from contestants registration form
+const contestantPhoto = multer({
+    storage: multer.diskStorage({
+        destination: function(req, file, cb) {
+            cb(null, 'uploads/contestants');
+        },
+        filename: function(req, file, cb) {
+            cb(null, Date.now() + path.extname(file.originalname));
+        }
+    })
+});
+
 //Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads/contestants', express.static(path.join(__dirname, 'uploads/contestants')));
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/public', express.static('public'));
@@ -148,7 +166,7 @@ app.post('/', upload.single('photo'), (request, response) => {
 
     // Insert user information into the user table
     const userInfo = 'INSERT INTO user (fname, mname, lname, dob, photo, role) VALUES (?, ?, ?, ?, ?, ?)';
-    const userPersonalData = [fName, mName, lName, dob, imagePath, role];
+    const userPersonalData = [fName, mName, lName, dob, imagePath, role]; //values for database placeholder
 
     if (!request.file) {
         return response.status(400).send(`<h1>No file received. Please try again.</h1>`);
@@ -371,11 +389,32 @@ app.get('/contestants', (request, response) => {
     response.render('contestants.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'})
 });
 
-//Contestants - get route ends
-
 // Contestants - post route starts
-app.post('/contestnats', (request, response) => {
-    response.redirect('/contestants')
+app.post('/contestants', contestantPhoto.single('contestants-photo'), (request, response) => {
+    //Destructure user input data
+    const {fName, mName, lName, position, party} = request.body;
+
+    //Get user photo store 
+    const imagePath = request.file ? request.file.path : null;
+
+    //Insert contestants data into contestant table
+    const contestantsData = `INSERT INTO candidates(fname, mname, lname, position_id, party_id, photo) VALUES(?,?,?,?,?,?)`
+
+    console.log(imagePath)
+
+    //Store values into array
+    const databaseValues = [fName, mName, lName, position, imagePath, party];
+
+    if (!request.file) {
+        return response.status(400).send(`<h1>No file received. Please try again.</h1>`);
+    } console.log('File received:', request.file);
+
+    db.run(contestantsData, databaseValues, (err) => {
+        if(err){
+            console.log(`Error inserting data into contestants table: ${err.message}`)
+        }console.log('Data inserted into contestants table')
+    })
+    // response.redirect('/contestants')
 });
 
 //Party registration - Get Route
@@ -388,17 +427,70 @@ app.get('/party', (request, response) => {
 
 //Party registration - Post Route
 app.post('/party', (request, response) => {
-    response.redirect('/party')
+    //insert data into party table
+    const {partyName, logo} = request.body;
+
+    const partyData = `INSERT INTO parties(party, logo) VALUES(?, ?)`;
+
+    const partyDetails = [partyName, logo];
+
+    db.run(partyData, partyDetails, (err) => {
+        if(err){
+            console.error(`Error inserting data: ${err.message}`);
+        }else{
+            console.log('Party data inserted successfully!', partyDetails);
+            response.redirect('/party');
+        }
+    })
+});
+
+// Positioin - Get Route
+app.get('/position', (request, response) => {
+    const imagePath = request.session.imagePath;
+    response.render('404.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
+});
+
+//Positon - Post Route
+app.post('/position', (request, response) => {
+    response.redirect('/position');
+   
+});
+
+//Election - Get Route
+app.get('/election', (request, response) => {
+    const imagePath = request.session.imagePath;
+    response.render('404.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
+});
+
+//Election - Post Route
+app.post('/election', (request, response) => {
+    response.redirect('/election')
+});
+
+//Vote list - Get Route
+app.get('/vote-list', (request, response) => {
+    const imagePath = request.session.imagePath;
+    response.render('404.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
+})
+//Vote list - Post Route
+app.post('/vote-list', (request, response) => {
+    const imagePath = request.session.imagePath;
+    response.render('404.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
+})
+
+//users - Get Route
+app.post('/users', (request, response) => {
+    const imagePath = request.session.imagePath;
+    response.render('404.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
+})
+
+//user - Post Route
+app.post('/users', (request, response) => {
+    const imagePath = request.session.imagePath;
+    response.render('404.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
 })
 
 //Listen to port
 app.listen(port, () =>{
     console.log(`Http response! Status: Listening on port: ${port} (http://localhost:${port})`);
 });
-
-
-
-
-
-
-
