@@ -9,24 +9,18 @@
     <div class="card-container card">
       <div class="card-body register-card-body col-12">
 
-          <h3 class="text-center"><b>Party</b> Registration</h3>
+          <h3 class="text-center"><b>Add</b> Election</h3>
 
-      <form action="/party" method="post" role="form" id="registrationForm">
+      <form action="/election" method="post" role="form" id="registrationForm">
           <!-- /.card-body -->
           <div class="card-body">
             <div class="form-group">
-              <label for="first-name">Party Name</label>
-              <input type="text" name="partyName" class="form-control" id="party-name" placeholder="Enter Party Name">
+              <label for="first-name">Election Type</label>
+              <input type="text" name="electionName" class="form-control" id="party-name" placeholder="Enter Election Name">
             </div>
-
             <div class="form-group">
-              <label for="file">Party Logo</label>
-              <div class="input-group">
-                <div class="custom-file">
-                  <input type="file" name="logo" class="custom-file-input inputImage"  id="file">
-                  <label class="custom-file-label imageName" for="file">Choose Logo</label>
-                </div>
-              </div>
+              <label for="first-name">Election Year</label>
+              <input type="date" name="electionYear" class="form-control" id="party-name" placeholder="Enter First Name">
             </div>
 
             <div class=" input-group">
@@ -41,6 +35,7 @@
     <!-- /.form-box -->
     </div><!-- /.card -->
     </div>
+    <div class="mb-5 pb-5"></div>
     <div class="mb-5 pb-5"></div>
     <div class="mb-5 pb-5"></div>
     <div class="mb-5 pb-5"></div>

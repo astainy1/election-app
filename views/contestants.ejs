@@ -31,10 +31,11 @@
 
             <div class="form-group">
               <div class="input-group">
-                  <select name="role" class="form-select" aria-label="Default select">
+                  <select name="position" class="form-select" aria-label="Default select">
                       <option class="border border-secondary" selected>Select Position</option>
-                      <option name="position">President</option>
-                      <option name="role">Vice President</option>
+                      <% for(const allPossition of positionModel) { %>
+                      <option name="position"> <%= allPossition.position %></option>
+                      <% } %>
                   </select>
               </div>
           </div>
@@ -51,13 +52,14 @@
 
             <div class="form-group">
               <div class="input-group">
-                  <select name="role" class="form-select" aria-label="Default select">
+                  <select name="position" class="form-select" aria-label="Default select">
                       <option class="border border-secondary" selected>Select Party</option>
-                      <option name="party">SUP</option>
-                      <option name="role">SIM</option>
+                      <% for(const allParty of partiesModel) {%>
+                      <option name="party"> <%= allParty.party %> </option>
+                      <% } %>
                   </select>
               </div>
-          </div>
+            </div>
 
             <div class=" input-group">
               <button class="btn btn-radius-2 btn-primary submit btn-block" type="submit" id="submit">Submit</button>

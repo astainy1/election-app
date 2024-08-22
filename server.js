@@ -31,7 +31,7 @@ const { errorMonitor } = require('events');
 
 //database connection
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./election.db');
+const db = new sqlite3.Database('./elections.db');
 
 //Auto refresh the browser during chances
 const liveReloadServer = liveReload.createServer();
@@ -79,11 +79,11 @@ const upload = multer({
     })
 }); // form photo input field name
 
-//Set up multer of file uploads from contestants registration form
+// Set up multer for file uploads from the contestant registration form
 const contestantPhoto = multer({
     storage: multer.diskStorage({
         destination: function(req, file, cb) {
-            cb(null, 'uploads/contestants');
+            cb(null, uploadDir);
         },
         filename: function(req, file, cb) {
             cb(null, Date.now() + path.extname(file.originalname));
@@ -112,6 +112,12 @@ db.serialize(() => {
         
 
     db.run(`CREATE TABLE IF NOT EXISTS parties(id INTEGER PRIMARY KEY AUTOINCREMENT,party VARCHAR(50) NOT NULL,logo BLOB NOT NULL);`);
+    
+    db.run(`CREATE TABLE IF NOT EXISTS positions(id INTEGER PRIMARY KEY AUTOINCREMENT,position VARCHAR(50) NOT NULL,election VARCHAR(50) NOT NULL);`);
+    
+    db.run(`CREATE TABLE IF NOT EXISTS elections(id INTEGER PRIMARY KEY AUTOINCREMENT,election VARCHAR(50) NOT NULL);`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS userRole(id INTEGER PRIMARY KEY AUTOINCREMENT,user VARCHAR(50) NOT NULL);`);
 
     db.run(`CREATE TABLE IF NOT EXISTS roles(user_Id INTEGER PRIMARY KEY AUTOINCREMENT,role VARCHAR(50) NOT NULL);`);
 
@@ -386,7 +392,29 @@ app.get('/contestants', (request, response) => {
     //Get image path
     const imagePath = request.session.imagePath;
 
-    response.render('contestants.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'})
+    //Get data from position table
+    const contestantPosition = `SELECT position FROM positions`;
+    db.serialize( () =>{
+        db.all(contestantPosition, (err, allPosition) => {
+            if(err){
+                console.error(`Error retreiving position from table: ${err.message}`);
+            }else{
+                console.log('Successfully retrieved data from positon table: ', allPosition);
+
+                const electionType = `SELECT party FROM parties`;
+
+                db.all(electionType, (err, allParties) => {
+                    if(err){
+                        console.error(`Error retrieving elections: ${err.message}`)
+                    }else{
+                        console.log('Successfully retrieved data from election: ', allParties);
+                        response.render('contestants.ejs', {positionModel: allPosition, partiesModel: allParties, LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'})
+                    }
+                })
+            }
+        })
+    })
+
 });
 
 // Contestants - post route starts
@@ -400,10 +428,8 @@ app.post('/contestants', contestantPhoto.single('contestants-photo'), (request, 
     //Insert contestants data into contestant table
     const contestantsData = `INSERT INTO candidates(fname, mname, lname, position_id, party_id, photo) VALUES(?,?,?,?,?,?)`
 
-    console.log(imagePath)
-
     //Store values into array
-    const databaseValues = [fName, mName, lName, position, imagePath, party];
+    const databaseValues = [fName, mName, lName, position, party, imagePath];
 
     if (!request.file) {
         return response.status(400).send(`<h1>No file received. Please try again.</h1>`);
@@ -413,8 +439,8 @@ app.post('/contestants', contestantPhoto.single('contestants-photo'), (request, 
         if(err){
             console.log(`Error inserting data into contestants table: ${err.message}`)
         }console.log('Data inserted into contestants table')
+        response.redirect('/contestants')
     })
-    // response.redirect('/contestants')
 });
 
 //Party registration - Get Route
@@ -423,6 +449,7 @@ app.get('/party', (request, response) => {
     const imagePath = request.session.imagePath;
 
     response.render('party-registration.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'})
+
 });
 
 //Party registration - Post Route
@@ -447,30 +474,68 @@ app.post('/party', (request, response) => {
 // Positioin - Get Route
 app.get('/position', (request, response) => {
     const imagePath = request.session.imagePath;
-    response.render('404.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
+    
+    //Get all election from election table
+    const retrievedElectionData = `SELECT election FROM elections`;
+    db.all(retrievedElectionData, (err, row) => {
+        if(err){
+            console.error(`Error retrieving election: ${err.message}`);
+        }else{
+            console.log('Successfully retrieve data:', row);
+            response.render('position.ejs', {electionType: row, LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
+        }
+    })
+
 });
 
 //Positon - Post Route
 app.post('/position', (request, response) => {
-    response.redirect('/position');
-   
+
+    //Destructure input field value
+    const {positionName, election} = request.body;
+    console.log(election)
+    //Insert all data into position table
+    const positionData = `INSERT INTO positions(position, election) VALUES(?,?)`;
+    const positionFormData = [positionName, election];
+
+    db.run(positionData, positionFormData, (err) => {
+        if(err){
+            console.error('Error inserting data into position table:', err.message)
+        }else{
+            console.log('Successfully added new position!')
+            response.redirect('/position');
+        }
+    })
 });
 
 //Election - Get Route
 app.get('/election', (request, response) => {
     const imagePath = request.session.imagePath;
-    response.render('404.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
+    response.render('elections.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
 });
 
 //Election - Post Route
 app.post('/election', (request, response) => {
-    response.redirect('/election')
+
+    const {electionName} = request.body;
+    //data into election table
+    const electionData = `INSERT INTO elections(election) VALUES(?)`;
+    const electionFormData = [electionName];
+
+    db.run(electionData, electionFormData, (err) => {
+        if(err){
+            console.error(`Error inserting data into election table: ${err.message}`);
+        }else{
+            console.log('Data inserted into election table successfully!');
+            response.redirect('/election')
+        }
+    })
 });
 
 //Vote list - Get Route
 app.get('/vote-list', (request, response) => {
     const imagePath = request.session.imagePath;
-    response.render('404.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
+    response.render('table.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
 })
 //Vote list - Post Route
 app.post('/vote-list', (request, response) => {
@@ -479,7 +544,7 @@ app.post('/vote-list', (request, response) => {
 })
 
 //users - Get Route
-app.post('/users', (request, response) => {
+app.get('/users', (request, response) => {
     const imagePath = request.session.imagePath;
     response.render('404.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
 })
