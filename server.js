@@ -67,6 +67,14 @@ if(!fs.existsSync(contestantsDir)){
     fs.mkdirSync(contestantsDir, { recursive: true });
     console.log('contestants directory is created')
 }
+
+//Create logo directory if not exist in upload directory
+const logoDir = path.join(__dirname, 'uploads/logo');
+if(!fs.existsSync(logoDir)){
+    fs.mkdirSync(logoDir, { recursive: true });
+    console.log('contestants directory is created')
+}
+
 // Set up multer for file uploads from voter registration form
 const upload = multer({
     storage: multer.diskStorage({
@@ -79,11 +87,23 @@ const upload = multer({
     })
 }); // form photo input field name
 
-// Set up multer for file uploads from the contestant registration form
+// Set up multer for uploading contestants picture from the contestant registration form
 const contestantPhoto = multer({
     storage: multer.diskStorage({
         destination: function(req, file, cb) {
-            cb(null, uploadDir);
+            cb(null, 'uploads/contestants');
+        },
+        filename: function(req, file, cb) {
+            cb(null, Date.now() + path.extname(file.originalname));
+        }
+    })
+});
+
+// Set up multer for uploading party logo from the contestant registration form
+const partyLogo = multer({
+    storage: multer.diskStorage({
+        destination: function(req, file, cb) {
+            cb(null, 'uploads/logo');
         },
         filename: function(req, file, cb) {
             cb(null, Date.now() + path.extname(file.originalname));
@@ -111,7 +131,7 @@ db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS candidates(id  INTEGER PRIMARY KEY AUTOINCREMENT,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,position_id VARCHAR(50) NOT NULL,party_id    VARCHAR(50) NOT NULL,photo BLOB NOT NULL);`);
         
 
-    db.run(`CREATE TABLE IF NOT EXISTS parties(id INTEGER PRIMARY KEY AUTOINCREMENT,party VARCHAR(50) NOT NULL,logo BLOB NOT NULL);`);
+    db.run(`CREATE TABLE IF NOT EXISTS parties(id INTEGER PRIMARY KEY AUTOINCREMENT,party VARCHAR(50) NOT NULL,logo BLOB);`);
     
     db.run(`CREATE TABLE IF NOT EXISTS positions(id INTEGER PRIMARY KEY AUTOINCREMENT,position VARCHAR(50) NOT NULL,election VARCHAR(50) NOT NULL);`);
     
@@ -130,7 +150,7 @@ db.serialize(() => {
         FROM roles
         GROUP BY role)`
     );
-    db.run(`CREATE TABLE IF NOT EXISTS user(id  INTEGER  PRIMARY KEY AUTOINCREMENT,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,dob DATE NOT NULL,photo BLOG NOT NULL,role VARCHAR(50) NOT NULL, voted)`);
+    db.run(`CREATE TABLE IF NOT EXISTS user(id  INTEGER  PRIMARY KEY AUTOINCREMENT,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,dob DATE NOT NULL,photo BLOB,role VARCHAR(50) NOT NULL, voted)`);
     
 //   db.run('CREATE TABLE lorem (info TEXT)')
 //   const stmt = db.prepare('INSERT INTO lorem VALUES (?)')
@@ -168,15 +188,20 @@ app.get('/register', (request, response) => {
 // Registration - Post route
 app.post('/', upload.single('photo'), (request, response) => {
     const { fName, mName, lName, dob, role, username, password } = request.body;
-    const imagePath = request.file ? request.file.path : null;
+    
+    let userImagePath;
+
+    if(request.file){
+        console.log('user image received!')
+        userImagePath = request.file.path;
+    }else{
+        console.log('No image. Therefore, default image will be used');
+        userImagePath = './uploads/pngegg.png'
+    }
 
     // Insert user information into the user table
     const userInfo = 'INSERT INTO user (fname, mname, lname, dob, photo, role) VALUES (?, ?, ?, ?, ?, ?)';
-    const userPersonalData = [fName, mName, lName, dob, imagePath, role]; //values for database placeholder
-
-    if (!request.file) {
-        return response.status(400).send(`<h1>No file received. Please try again.</h1>`);
-    } console.log('File received:', request.file);
+    const userPersonalData = [fName, mName, lName, dob, userImagePath, role]; //values for database placeholder
 
     db.run(userInfo, userPersonalData, function(err) {
         if (err) {
@@ -359,11 +384,25 @@ app.get('/dashboard', (request, response) => {
         db.get(retrieveData, [], (err, row) => {
             if(err){
                 console.error('Error counting role: ', err.message);
-            }
-            if(row){
-                const userDashboard = 'Admin Electorial Dashboard'
-                console.log('Total voters: ', row.total_voters);
-                response.render('admin-dashboard.ejs', {message: userDashboard, totalVotes: row, LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard'});
+            }else{
+
+                //Get all contestants details
+                const contestantsDetails = `SELECT * FROM candidates`;
+                db.all(contestantsDetails, (err, rows) => {
+                    if(err){
+                        console.error(`Error retrieving contestants details: ${err.message}`);
+                    }else{
+
+                        console.log('All candidates:', rows)
+                    }
+                });
+
+                if(row){
+
+                    const userDashboard = 'Admin Electorial Dashboard'
+                    console.log('Total voters: ', row.total_voters);
+                    response.render('admin-dashboard.ejs', {message: userDashboard, totalVotes: row, LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard'});
+                }
             }
         });
 
@@ -425,15 +464,15 @@ app.post('/contestants', contestantPhoto.single('contestants-photo'), (request, 
     //Get user photo store 
     const imagePath = request.file ? request.file.path : null;
 
+    //If file receive, upload file. Else send error message
+    if (request.file) {
+        return response.status(400).send(`<h1>No file received. Please try again.</h1>`);
+    } console.log('File received:', request.file);
     //Insert contestants data into contestant table
     const contestantsData = `INSERT INTO candidates(fname, mname, lname, position_id, party_id, photo) VALUES(?,?,?,?,?,?)`
 
     //Store values into array
     const databaseValues = [fName, mName, lName, position, party, imagePath];
-
-    if (!request.file) {
-        return response.status(400).send(`<h1>No file received. Please try again.</h1>`);
-    } console.log('File received:', request.file);
 
     db.run(contestantsData, databaseValues, (err) => {
         if(err){
@@ -453,14 +492,28 @@ app.get('/party', (request, response) => {
 });
 
 //Party registration - Post Route
-app.post('/party', (request, response) => {
+app.post('/party', partyLogo.single('logo'), (request, response) => {
     //insert data into party table
-    const {partyName, logo} = request.body;
+    const {partyName} = request.body;
+
+    let partyLogo;
+
+    if(request.file){
+        partyLogo = request.file.path;
+    }else{
+        console.log('Default logo will be used')
+        partyLogo = './uploads/logo/old_logo.png';
+    }
 
     const partyData = `INSERT INTO parties(party, logo) VALUES(?, ?)`;
 
-    const partyDetails = [partyName, logo];
-
+    const partyDetails = [partyName, partyLogo];
+    
+    if(!request.file || !request.file.path){
+        console.log('Error requesting file');
+    }else{
+        console.log('File uploaded successfully', request.file)
+    }
     db.run(partyData, partyDetails, (err) => {
         if(err){
             console.error(`Error inserting data: ${err.message}`);
