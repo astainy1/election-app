@@ -113,7 +113,7 @@ const partyLogo = multer({
 
 //Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/uploads/contestants', express.static(path.join(__dirname, 'uploads/contestants')));
+// app.use('/uploads/contestants', express.static(path.join(__dirname, 'uploads/contestants')));
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/public', express.static('public'));
@@ -128,7 +128,7 @@ db.serialize(() => {
 
     db.run( `CREATE TABLE IF NOT EXISTS auth (id INTEGER PRIMARY KEY AUTOINCREMENT,username VARCHAR(50) NOT NULL,password VARCHAR(50) NOT NULL,user_id INTEGER NOT NULL);`);
 
-    db.run(`CREATE TABLE IF NOT EXISTS candidates(id  INTEGER PRIMARY KEY AUTOINCREMENT,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,position_id VARCHAR(50) NOT NULL,party_id    VARCHAR(50) NOT NULL,photo BLOB NOT NULL);`);
+    db.run(`CREATE TABLE IF NOT EXISTS candidates(id  INTEGER PRIMARY KEY AUTOINCREMENT,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,position_id VARCHAR(50) NOT NULL,party_id VARCHAR(50) NOT NULL,photo BLOB NOT NULL);`);
         
 
     db.run(`CREATE TABLE IF NOT EXISTS parties(id INTEGER PRIMARY KEY AUTOINCREMENT,party VARCHAR(50) NOT NULL,logo BLOB);`);
@@ -377,32 +377,38 @@ app.get('/dashboard', (request, response) => {
     // Get username and image path from session
     const username = request.session.username;
     const imagePath = request.session.imagePath; // Retrieve the image path from session
-    
+
+    //Declare candidates variable to an empty value;
+    let candidatesData; 
+
     if (username) {
  //query the total number of voter from role column in user table
         const retrieveData = `SELECT COUNT(*) AS total_voters FROM user WHERE role = 'Voter'`; 
         db.get(retrieveData, [], (err, row) => {
+
             if(err){
                 console.error('Error counting role: ', err.message);
             }else{
 
                 //Get all contestants details
                 const contestantsDetails = `SELECT * FROM candidates`;
-                db.all(contestantsDetails, (err, rows) => {
+                db.all(contestantsDetails, [], (err, rows) => {
                     if(err){
                         console.error(`Error retrieving contestants details: ${err.message}`);
                     }else{
 
-                        console.log('All candidates:', rows)
+                        console.log('All candidates:', rows);
+
+                        if(row){
+
+                            const userDashboard = 'Admin Electorial Dashboard';
+                            console.log('Total voters: ', row.total_voters);
+                            response.render('admin-dashboard.ejs', {message: userDashboard, totalVotes: row, LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard'});
+                        }
                     }
                 });
 
-                if(row){
-
-                    const userDashboard = 'Admin Electorial Dashboard'
-                    console.log('Total voters: ', row.total_voters);
-                    response.render('admin-dashboard.ejs', {message: userDashboard, totalVotes: row, LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard'});
-                }
+                
             }
         });
 
@@ -461,11 +467,12 @@ app.post('/contestants', contestantPhoto.single('contestants-photo'), (request, 
     //Destructure user input data
     const {fName, mName, lName, position, party} = request.body;
 
+    console.log(party);
     //Get user photo store 
     const imagePath = request.file ? request.file.path : null;
 
     //If file receive, upload file. Else send error message
-    if (request.file) {
+    if (!request.file) {
         return response.status(400).send(`<h1>No file received. Please try again.</h1>`);
     } console.log('File received:', request.file);
     //Insert contestants data into contestant table
