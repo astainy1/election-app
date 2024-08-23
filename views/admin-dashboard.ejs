@@ -76,7 +76,7 @@
                                 <div class="card-body">
                                     <div class="row no-gutters d-flex justify-content-between">
                                         <div class="col-auto">
-                                            <img src="<%= candidate.photo %>" alt="Candidate photo" style="max-width: 100px; max-height: 100px; object-fit: cover;" class="img-profile img-fluid rounded-1 img-thumbnail">
+                                            <img src="<%= candidate.photo ? '/' + candidate.photo : './uploads/contestants/default-president.png' %>" alt="<%= candidate.fname %> <%= candidate.lname %> photo" style="max-width: 100px; max-height: 100px; object-fit: cover;" class="img-profile img-fluid rounded-1 img-thumbnail">
                                         </div>
                                         <div class="">
                                             <h5 class="card-title h3">0<%= candidate.vote %></h5>
