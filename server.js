@@ -50,7 +50,8 @@ app.set('views engine', 'ejs');
 app.use(session({
     secret: 'votin_gapp',
     saveUninitialized: true,
-    resave: true
+    resave: true,
+    cookie: {secure: false}
 }))
 
 //Create upload directory if not exist
@@ -150,7 +151,10 @@ db.serialize(() => {
         FROM roles
         GROUP BY role)`
     );
+
     db.run(`CREATE TABLE IF NOT EXISTS user(id  INTEGER  PRIMARY KEY AUTOINCREMENT,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,dob DATE NOT NULL,photo BLOB,role VARCHAR(50) NOT NULL, voted)`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS votes(id INTEGER PRIMARY KEY AUTOINCREMENT,candidate_id TEXT,vote TEXT,user_id TEXT);`);
     
 //   db.run('CREATE TABLE lorem (info TEXT)')
 //   const stmt = db.prepare('INSERT INTO lorem VALUES (?)')
@@ -169,6 +173,17 @@ db.serialize(() => {
 // db.close()
 
 app.use(body.urlencoded({extended: true}));
+
+//Function to authenticate user login behivour
+function isAuthenticate(request, response, next){
+    if(request.session && request.session.isLoggedIn){
+        //if user is authenticated, allow user to the next route
+        return next();
+    }else{
+        //else allow user to the home route.
+        response.redirect('/');
+    }
+}
 
 //Registration - Get route
 app.get('/register', (request, response) => {
@@ -270,6 +285,20 @@ app.get('/', (request, response) => {
     response.render('login.ejs', {errorMessage: '', pageTitle : 'Login'});
 });
 
+// Logout - Get route
+app.get('/logout', (request, response) => {
+    request.session.destroy((err) => {
+        if(err){
+            return response.redirect('/dashboard');
+        }else{
+            // Destory cookies
+            response.clearCookie('connect.sid'); 
+
+            response.redirect('/');
+        }
+    })
+})
+
 //Recover Account - Get route
 app.get('/recover-account', (req, res) => {
     res.render('recover-password.ejs', {pageTitle : 'Reset Password'});
@@ -339,6 +368,8 @@ app.post('/dashboard', (req, res) => {
                             console.error(err.message);
                         }
                         if(roleResult.role === 'Admin'){
+                            //is authenticated
+                            req.session.isLoggedIn = true;
 
                             console.log('Admin has loggedin!')
 
@@ -346,11 +377,15 @@ app.post('/dashboard', (req, res) => {
                             res.redirect('/dashboard');
 
                         }else if(roleResult.role === 'Candidate'){
+                            //is authenticated
+                            req.session.isLoggedIn = true;
 
                             console.log('Candidate has logged in')
                             res.render('candidate-dashboard.ejs', {LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard', message: 'Welcome to Candidate dashboard', pageTitle: 'Dashboard'});
 
                         }else if(roleResult.role === 'Voter'){
+                            //is authenticated
+                            req.session.isLoggedIn = true;
 
                             console.log('Voter has logged in!')
                             res.render('vote.ejs', {LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard', message: 'Welcome to Voter dashboard', pageTitle: 'Dashboard'})
@@ -371,7 +406,7 @@ app.post('/dashboard', (req, res) => {
     });
 });
 
-app.get('/dashboard', (request, response) => {
+app.get('/dashboard', isAuthenticate, (request, response) => {
     const username = request.session.username;
     const imagePath = request.session.imagePath;
 
@@ -431,18 +466,18 @@ app.get('/dashboard', (request, response) => {
 
 
 //voter - Get route
-app.get('/voter', (request, response) => {
+app.get('/voter', isAuthenticate, (request, response) => {
     response.send('Welcome to voter dashboard');
 });
 
 //Candidate - Get route
-app.get('/candidate', (request, response) => {
+app.get('/candidate', isAuthenticate, (request, response) => {
     response.send('Welcome to candidate dashboard')
 })
 
 
 //Contestants - get route starts
-app.get('/contestants', (request, response) => {
+app.get('/contestants', isAuthenticate, (request, response) => {
 
     //Get image path
     const imagePath = request.session.imagePath;
@@ -500,7 +535,7 @@ app.post('/contestants', contestantPhoto.single('contestants-photo'), (request, 
 });
 
 //Party registration - Get Route
-app.get('/party', (request, response) => {
+app.get('/party', isAuthenticate, (request, response) => {
     //Get image path
     const imagePath = request.session.imagePath;
 
@@ -542,7 +577,7 @@ app.post('/party', partyLogo.single('logo'), (request, response) => {
 });
 
 // Positioin - Get Route
-app.get('/position', (request, response) => {
+app.get('/position', isAuthenticate, (request, response) => {
     const imagePath = request.session.imagePath;
     
     //Get all election from election table
@@ -579,7 +614,7 @@ app.post('/position', (request, response) => {
 });
 
 //Election - Get Route
-app.get('/election', (request, response) => {
+app.get('/election', isAuthenticate, (request, response) => {
     const imagePath = request.session.imagePath;
     response.render('elections.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
 });
@@ -603,7 +638,7 @@ app.post('/election', (request, response) => {
 });
 
 //Vote list - Get Route
-app.get('/vote-list', (request, response) => {
+app.get('/vote-list', isAuthenticate, (request, response) => {
     const imagePath = request.session.imagePath;
     response.render('table.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
 })
@@ -614,7 +649,7 @@ app.post('/vote-list', (request, response) => {
 })
 
 //users - Get Route
-app.get('/users', (request, response) => {
+app.get('/users', isAuthenticate, (request, response) => {
     const imagePath = request.session.imagePath;
     response.render('404.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
 })
@@ -623,6 +658,11 @@ app.get('/users', (request, response) => {
 app.post('/users', (request, response) => {
     const imagePath = request.session.imagePath;
     response.render('404.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
+})
+
+//404 route
+app.use((request, response, next) => {
+    response.status(404).render('error404.ejs', {pageTitle: 404})
 })
 
 //Listen to port
