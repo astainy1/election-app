@@ -658,12 +658,31 @@ app.get('/users', isAuthenticate, (request, response) => {
 app.post('/users', (request, response) => {
     const imagePath = request.session.imagePath;
     response.render('404.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
+});
+
+//Vote - Get route
+app.get('/vote', isAuthenticate, (request, response) => {
+    const imagePath = request.session.imagePath;
+
+    //Get all candidates from candidates table
+    const contestantsData = `SELECT * FROM candidates`;
+    db.get()
+    response.render('vote.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants', message: ''});
+});
+
+//Vote - Post route
+app.post('/vote', (request, response) => {
+
+    response.redirect('/vote')
 })
+
+
+//Vote - Post route
 
 //404 route
 app.use((request, response, next) => {
     response.status(404).render('error404.ejs', {pageTitle: 404})
-})
+}); // use this same method  to display other error messsages changing the error code and pages to be rendered.
 
 //Listen to port
 app.listen(port, () =>{
