@@ -663,15 +663,17 @@ app.get('/vote', isAuthenticate, (request, response) => {
     //Get all candidates from candidates table
     const contestantsData = `SELECT * FROM candidates`;
     db.all(contestantsData, [], (err, result) => {
+    
+        //Get username and user image from session upon a successful login.
         const username = request.session.username;
         const imagePath = request.session.imagePath;
         if(err){
+            //if error
             console.error(err.message);
         }else{
 
+            //if no error display candidates information in the user dashboard
             console.log('some just voted');
-
-            console.log(result.fname)
             response.render('vote.ejs', {contestant: result, LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard', message: 'Welcome to Voter dashboard', pageTitle: 'Dashboard'});
         }
     })
@@ -680,6 +682,13 @@ app.get('/vote', isAuthenticate, (request, response) => {
 //Vote - Post route
 app.post('/vote', (request, response) => {
 
+    //Get candidate id and user id
+    const candidataId = request.session.candidate_id;
+    const userId = request.session.user_id;
+
+    //Now, update the vote table if there is no vote
+
+    //If the loggined user has already voted, display has already voted to such user.
     response.redirect('/vote')
 })
 
