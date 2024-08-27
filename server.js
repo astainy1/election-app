@@ -145,11 +145,7 @@ db.serialize(() => {
     // Insert into roles table
     db.run(`INSERT INTO     roles (role) VALUES('Admin'), ('Candidate'), ('Voter')`);
     db.run(
-        `DELETE FROM roles
-        WHERE rowid NOT IN (
-        SELECT MIN(rowid)
-        FROM roles
-        GROUP BY role)`
+        `DELETE FROM roles WHERE rowid NOT IN (SELECT MIN(rowid) FROM roles GROUP BY role)`
     );
 
     db.run(`CREATE TABLE IF NOT EXISTS user(id  INTEGER  PRIMARY KEY AUTOINCREMENT,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,dob DATE NOT NULL,photo BLOB,role VARCHAR(50) NOT NULL, voted)`);
@@ -388,7 +384,7 @@ app.post('/dashboard', (req, res) => {
                             req.session.isLoggedIn = true;
 
                             console.log('Voter has logged in!')
-                            res.render('vote.ejs', {LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard', message: 'Welcome to Voter dashboard', pageTitle: 'Dashboard'})
+                            res.redirect('/vote')
 
                         }else{
 
@@ -666,8 +662,19 @@ app.get('/vote', isAuthenticate, (request, response) => {
 
     //Get all candidates from candidates table
     const contestantsData = `SELECT * FROM candidates`;
-    db.get()
-    response.render('vote.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants', message: ''});
+    db.all(contestantsData, [], (err, result) => {
+        const username = request.session.username;
+        const imagePath = request.session.imagePath;
+        if(err){
+            console.error(err.message);
+        }else{
+
+            console.log('some just voted');
+
+            console.log(result.fname)
+            response.render('vote.ejs', {contestant: result, LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard', message: 'Welcome to Voter dashboard', pageTitle: 'Dashboard'});
+        }
+    })
 });
 
 //Vote - Post route
