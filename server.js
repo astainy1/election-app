@@ -425,19 +425,24 @@ app.get('/dashboard', isAuthenticate, (request, response) => {
                 });
             } 
 
+            //Get total vote from votes table
+            const totalUserVotes = `SELECT COUNT(*) AS total_votes FROM votes WHERE vote = 1`;
+
+            db.all(totalUserVotes, [], (err, result) => {
+                if(err){
+                    console.error(`Error retrieving total votes: ${err.message}`);
+                }else{
+                    console.log(`Total vote: ${result}`)
+                }
+            });
+
             const contestantsDetails = `SELECT * FROM candidates`;
 
             db.all(contestantsDetails, [], (err, rows) => {
                 if (err) {
                     console.error(`Error retrieving contestants details: ${err.message}`);
-                    return response.status(500).render('admin-dashboard.ejs', {
-                        message: 'Error loading dashboard',
-                        totalVotes: row,
-                        candidatesData: null,
-                        LoginedUsername: username,
-                        image: imagePath ? `/uploads/${path.basename(imagePath)}` : null,
-                        pageTitle: 'Dashboard',
-                        moduleName: 'Dashboard'
+                    return response.status(500).render('admin-dashboard.ejs', {message: 'Error loading dashboard', totalVotes: row, candidatesData: null,
+                        LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard'
                     });
                 } 
 
@@ -662,7 +667,8 @@ app.post('/users', (request, response) => {
 //Vote - Get route
 app.get('/vote', isAuthenticate, (request, response) => {
     const imagePath = request.session.imagePath;
-
+    // const candidateId = request.body.candidate_id;
+    const userId = request.session.user_id;
     //Get all candidates from candidates table
     const contestantsData = `SELECT * FROM candidates`;
     db.all(contestantsData, [], (err, result) => {
@@ -674,11 +680,28 @@ app.get('/vote', isAuthenticate, (request, response) => {
             //if error
             console.error(err.message);
         }else{
+            
+            //Get user id from votes table
+            const checkUserVoteStatus = `SELECT * FROM votes WHERE user_id = ?`;
 
-            //if no error display candidates information in the user dashboard
-            console.log('All candidates have been displayed');
-            response.render('vote.ejs', {contestant: result, LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard', message: 'Welcome to Voter dashboard', pageTitle: 'Dashboard'});
-        }
+            db.get(checkUserVoteStatus, [userId], (err, row) => {
+                //Check for error
+                if(err){
+                    console.error('Error getting user id', err.message);
+                    response.status(500).send('Internal server error');
+                }
+
+                //If no error, get the result from the table and check if user has voted
+                if(row){
+                    console.log('user has already voted');
+                    return response.render('voted.ejs', {contestant: result, LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard', message: 'Welcome to Voter dashboard', pageTitle: 'Dashboard'});
+
+                    //if no error display candidates information in the user dashboard
+                }
+                console.log('All candidates have been displayed');
+                response.render('vote.ejs', {contestant: result, LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard', message: 'Welcome to Voter dashboard', pageTitle: 'Dashboard'});
+            })}
+        
     })
 });
 
@@ -711,7 +734,7 @@ app.post('/vote', (request, response) => {
         if(row){
 
             console.log('user has already voted');
-            return response.send('You have already cast your vote!')
+            return response.render('voted.ejs')
            
         }else{
             console.log('Someone has voted for candidate', candidate_id);
