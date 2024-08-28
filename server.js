@@ -311,7 +311,7 @@ app.post('/dashboard', (req, res) => {
     const { role, username, password } = req.body;
 
     // Query to access username and prevent SQL injection
-    const authData = `SELECT id, username, password FROM auth WHERE username = ?`;
+    const authData = `SELECT * FROM auth WHERE username = ?`;
 
     db.get(authData, [username], (err, row) => {
         if (err) {
@@ -339,7 +339,8 @@ app.post('/dashboard', (req, res) => {
 
                 // Store username in session
                 req.session.username = username;
-
+                //Store user id in session
+                req.session.user_id = row.user_id;
                 // Retrieve the user's image path from the user table
                 const userImageQuery = `SELECT photo FROM user WHERE id = ?`;
 
@@ -382,6 +383,8 @@ app.post('/dashboard', (req, res) => {
                         }else if(roleResult.role === 'Voter'){
                             //is authenticated
                             req.session.isLoggedIn = true;
+                            //Get user id and store into session
+                            console.log(req.session.user_id); //testing the logic
 
                             console.log('Voter has logged in!')
                             res.redirect('/vote')
@@ -673,7 +676,7 @@ app.get('/vote', isAuthenticate, (request, response) => {
         }else{
 
             //if no error display candidates information in the user dashboard
-            console.log('some just voted');
+            console.log('All candidates have been displayed');
             response.render('vote.ejs', {contestant: result, LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard', message: 'Welcome to Voter dashboard', pageTitle: 'Dashboard'});
         }
     })
@@ -682,14 +685,56 @@ app.get('/vote', isAuthenticate, (request, response) => {
 //Vote - Post route
 app.post('/vote', (request, response) => {
 
+    const {candidate_id} = request.body;
     //Get candidate id and user id
-    const candidataId = request.session.candidate_id;
+    // const candidateId = request.body.candidate_id;
     const userId = request.session.user_id;
 
-    //Now, update the vote table if there is no vote
+    //Check if there is error in getting user id
+    if(!userId){
 
-    //If the loggined user has already voted, display has already voted to such user.
-    response.redirect('/vote')
+        console.log(candidate_id);
+        console.log('Error getting user id. You must login first')
+    }
+    
+    //Get user id from votes table
+    const checkUserVoteStatus = `SELECT * FROM votes WHERE user_id = ?`;
+
+    db.get(checkUserVoteStatus, [userId], (err, row) => {
+        //Check for error
+        if(err){
+            console.error('Error getting user id', err.message);
+            response.status(500).send('Internal server error');
+        }
+
+        //If no error, get the result from the table and check if user has voted
+        if(row){
+
+            console.log('user has already voted');
+            return response.send('You have already cast your vote!')
+           
+        }else{
+            console.log('Someone has voted for candidate', candidate_id);
+            //Now, update the vote table if there is no vote
+            const castUserVote = `INSERT INTO votes(candidate_id, user_id) VALUES(?,?)`;
+            db.run(castUserVote, [candidate_id, userId], (err) => {
+                if(err){
+                    console.log('Error casting user vote');
+                    return response.status(500).send('Internal server error')
+
+                }else{
+
+                    console.log(candidate_id);
+                    console.log(userId);
+                    console.log('vote cast successfully')
+                    response.redirect('/vote')
+                }
+            })
+        }
+
+    })
+        //If the loggined user has already voted, display has already voted to such user.
+
 })
 
 
