@@ -715,9 +715,10 @@ app.post('/vote', (request, response) => {
            
         }else{
             console.log('Someone has voted for candidate', candidate_id);
+            const voteStatus = 1;
             //Now, update the vote table if there is no vote
-            const castUserVote = `INSERT INTO votes(candidate_id, user_id) VALUES(?,?)`;
-            db.run(castUserVote, [candidate_id, userId], (err) => {
+            const castUserVote = `INSERT INTO votes(candidate_id, vote, user_id) VALUES(?,?,?)`;
+            db.run(castUserVote, [candidate_id, voteStatus, userId], (err) => {
                 if(err){
                     console.log('Error casting user vote');
                     return response.status(500).send('Internal server error')
