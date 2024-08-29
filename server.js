@@ -148,7 +148,7 @@ db.serialize(() => {
         `DELETE FROM roles WHERE rowid NOT IN (SELECT MIN(rowid) FROM roles GROUP BY role)`
     );
 
-    db.run(`CREATE TABLE IF NOT EXISTS user(id  INTEGER  PRIMARY KEY AUTOINCREMENT,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,dob DATE NOT NULL,photo BLOB,role VARCHAR(50) NOT NULL, voted)`);
+    db.run(`CREATE TABLE IF NOT EXISTS user(id  INTEGER  PRIMARY KEY AUTOINCREMENT,fname VARCHAR(50) NOT NULL,mname VARCHAR(50) NULL,lname VARCHAR(50) NOT NULL,dob DATE NOT NULL,photo BLOB,role VARCHAR(50) NOT NULL, voted TEXT DEFAULT 'Has not voted!')`);
 
     db.run(`CREATE TABLE IF NOT EXISTS votes(id INTEGER PRIMARY KEY AUTOINCREMENT,candidate_id TEXT,vote TEXT,user_id TEXT);`);
     
@@ -442,7 +442,6 @@ app.get('/dashboard', isAuthenticate, (request, response) => {
                         moduleName: 'Dashboard'
                     });
                 }
-
                 // Get total votes for each candidate
                 const candidateVotes = `
                     SELECT c.id, c.fname, c.mname, c.lname, c.position_id, c.party_id, c.photo, COUNT(v.vote) AS totalCandidateVote, COUNT((v.id) * 100.0 / (SELECT COUNT(*) FROM votes)) AS votePercentage
@@ -467,16 +466,18 @@ app.get('/dashboard', isAuthenticate, (request, response) => {
                     }
 
                     const userDashboard = 'Admin Electoral Dashboard';
+                    
                     response.render('admin-dashboard.ejs', { 
                         message: userDashboard, 
-                        totalVoters: row, 
+                        totalVoters: row,
                         totalVotes: result, 
                         candidatesData: rows, 
                         LoginedUsername: username, 
                         image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, 
                         pageTitle: 'Dashboard', 
                         moduleName: 'Dashboard'
-                    });
+            })
+            
                 });
             });
         });
@@ -664,8 +665,20 @@ app.post('/election', (request, response) => {
 //Vote list - Get Route
 app.get('/vote-list', isAuthenticate, (request, response) => {
     const imagePath = request.session.imagePath;
-    response.render('table.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
+
+    //Query all registered voters from users table
+    const allVoters = `SELECT u.id, u.fname, u.mname, u.lname, u.voted, u.dob, u.photo, a.username FROM user u  JOIN auth a ON u.id = a.user_id WHERE role = 'Voter'`;
+
+    db.all(allVoters, [], (err, voterListing) => {
+
+        if(err){
+            console.error(`Error getting voter list from users table: ${err.message}`)
+        }
+        console.log(voterListing);
+        response.render('table.ejs', {totalVoterList: voterListing, LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Voter Listing'});
+    });
 })
+
 //Vote list - Post Route
 app.post('/vote-list', (request, response) => {
     const imagePath = request.session.imagePath;
@@ -778,10 +791,18 @@ app.post('/vote', (request, response) => {
 
                 }else{
 
-                    console.log(candidate_id);
-                    console.log(userId);
-                    console.log('vote cast successfully')
-                    response.redirect('/vote')
+                    //Update the voted column of the user table
+                    const updateVoted = `UPDATE user SET voted = 'Has Voted' WHERE id = ?`
+                    db.run(updateVoted, [userId], (err) => {
+                        if(err){
+                            console.error(`Problem updated voted column in user table: ${err.message}`);
+                        }
+                        console.log(candidate_id);
+                        console.log(userId);
+                        console.log('vote cast successfully')
+                        response.redirect('/vote')
+                    })
+                   
                 }
             })
         }

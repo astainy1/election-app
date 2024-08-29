@@ -52,6 +52,7 @@
                                             <th>Username</th>
                                             <th>Date of Birth</th>
                                             <th>Age</th>
+                                            <th>Vote Status</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -64,80 +65,31 @@
                                             <th>Username</th>
                                             <th>Date of Birth</th>
                                             <th>Age</th>
+                                            <th>Vote Status</th>
                                             <th>Action</th>
                                         </tr>
                                     </tfoot>
                                     <tbody>
+                                        <% totalVoterList.forEach( (voter) => { %>
                                         <tr>
-                                            <td><img src="./uploads/pngegg.png" class=" img-fluid rounded-circle img-thumbnail" alt="voter picture" style="max-width: 50px; max-height: 50px; object-fit: cover;"></td>
-                                            <td>Christian</td>
-                                            <td>Astainy</td>
-                                            <td>Harris</td>
-                                            <td>astainy</td>
-                                            <td>07/09/1987</td>
+                                            <td><img src="<%= voter.photo ? '/' + voter.photo : './uploads/pngegg.png' %>" class=" img-fluid rounded-circle img-thumbnail" alt="voter picture" style="max-width: 50px; max-height: 50px; object-fit: contain;"></td>
+                                            <td><%= voter.fname %></td>
+                                            <td><%= voter.mname %></td>
+                                            <td><%= voter.lname %></td>
+                                            <td><%= voter.username %></td>
+                                            <td><%= voter.dob %></td>
                                             <td>61</td>
+                                            <% if(voter.voted === 'Has Voted') { %>
+                                            <td class="text-success"> <%= voter.voted %> <i class="fas fa-check-circle"></i></td>
+                                            <% } else { %>
+                                            <td class="text-danger"> <%= voter.voted %> <i class="fas fa-times-circle"></i></td>
+                                            <% } %>
                                             <td>
                                                 <button type="button" class="btn btn-success">Edit</button>
                                                 <button type="button" class="btn btn-danger">Delete</button>
                                             </td>
                                         </tr>
-                                        
-                                        <tr>
-                                            <td><img src="./uploads/pngegg.png" class=" img-fluid rounded-circle img-thumbnail" alt="voter picture" style="max-width: 50px; max-height: 50px; object-fit: cover;"></td>
-                                            <td>Emmanuel</td>
-                                            <td>Pruh</td>
-                                            <td>Sheriff</td>
-                                            <td>pruh</td>
-                                            <td>07/09/1987</td>
-                                            <td>49</td>
-                                            <td>
-                                                <button type="button" class="btn btn-success">Edit</button>
-                                                <button type="button" class="btn btn-danger">Delete</button>
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <td><img src="./uploads/pngegg.png" class=" img-fluid rounded-circle img-thumbnail" alt="voter picture" style="max-width: 50px; max-height: 50px; object-fit: cover;"></td>
-                                            <td>Gabriel</td>
-                                            <td>W.</td>
-                                            <td>Kun</td>
-                                            <td>gabriel</td>
-                                            <td>07/09/1987</td>
-                                            <td>89</td>
-                                            <td>
-                                                <button type="button" class="btn btn-success">Edit</button>
-                                                <button type="button" class="btn btn-danger">Delete</button>
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <td><img src="./uploads/pngegg.png" class=" img-fluid rounded-circle img-thumbnail" alt="voter picture" style="max-width: 50px; max-height: 50px; object-fit: cover;"></td>
-                                            <td>Fofee</td>
-                                            <td>Fofahnnah</td>
-                                            <td>Kromah</td>
-                                            <td>fofee</td>
-                                            <td>07/09/1987</td>
-                                            <td>39</td>
-                                            <td>
-                                                <button type="button" class="btn btn-success">Edit</button>
-                                                <button type="button" class="btn btn-danger">Delete</button>
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <td><img src="./uploads/pngegg.png" class=" img-fluid rounded-circle img-thumbnail" alt="voter picture" style="max-width: 50px; max-height: 50px; object-fit: cover;"></td>
-                                            <td>Outland</td>
-                                            <td>Blessboy</td>
-                                            <td>Sirleaf</td>
-                                            <td>gmore</td>
-                                            <td>07/09/1987</td>
-                                            <td>89</td>
-                                            <td>
-                                                <button type="button" class="btn btn-success">Edit</button>
-                                                <button type="button" class="btn btn-danger">Delete</button>
-                                            </td>
-                                        </tr>
-
+                                        <% }) %>
                                     </tbody>
                                 </table>
                             </div>
