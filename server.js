@@ -405,6 +405,7 @@ app.post('/dashboard', (req, res) => {
     });
 });
 
+//Dashboard - Get route
 app.get('/dashboard', isAuthenticate, (request, response) => {
     const username = request.session.username;
     const imagePath = request.session.imagePath;
@@ -414,55 +415,74 @@ app.get('/dashboard', isAuthenticate, (request, response) => {
 
         db.get(retrieveData, [], (err, row) => {
             if (err) {
-                console.error('Error counting role: ', err.message);
-                return response.status(500).render('admin-dashboard.ejs', {
-                    message: 'Error loading dashboard',
-                    totalVotes: null,
-                    LoginedUsername: username,
-                    image: imagePath ? `/uploads/${path.basename(imagePath)}` : null,
-                    pageTitle: 'Dashboard',
+                console.error('Error counting voters: ', err.message);
+                return response.status(500).render('admin-dashboard.ejs', { 
+                    message: 'Error loading dashboard', 
+                    totalVoters: null, 
+                    LoginedUsername: username, 
+                    image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, 
+                    pageTitle: 'Dashboard', 
                     moduleName: 'Dashboard'
                 });
             } 
 
-            //Get total vote from votes table
+            // Get total votes
             const totalUserVotes = `SELECT COUNT(*) AS total_votes FROM votes WHERE vote = 1`;
 
-            db.all(totalUserVotes, [], (err, result) => {
+            db.get(totalUserVotes, [], (err, result) => {
                 if(err){
-                    console.error(`Error retrieving total votes: ${err.message}`);
-                }else{
-                    console.log(`Total vote: ${result}`)
-                }
-            });
-
-            const contestantsDetails = `SELECT * FROM candidates`;
-
-            db.all(contestantsDetails, [], (err, rows) => {
-                if (err) {
-                    console.error(`Error retrieving contestants details: ${err.message}`);
-                    return response.status(500).render('admin-dashboard.ejs', {message: 'Error loading dashboard', totalVotes: row, candidatesData: null,
-                        LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard'
+                    console.error('Error retrieving total votes: ', err.message);
+                    return response.status(500).render('admin-dashboard.ejs', { 
+                        message: 'Error loading dashboard', 
+                        totalVoters: row, 
+                        totalVotes: null, 
+                        LoginedUsername: username, 
+                        image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, 
+                        pageTitle: 'Dashboard', 
+                        moduleName: 'Dashboard'
                     });
-                } 
+                }
 
-                console.log('All candidates:', rows);
+                // Get total votes for each candidate
+                const candidateVotes = `
+                    SELECT c.id, c.fname, c.mname, c.lname, c.position_id, c.party_id, c.photo, COUNT(v.vote) AS totalCandidateVote, COUNT((v.id) * 100.0 / (SELECT COUNT(*) FROM votes)) AS votePercentage
+                    FROM candidates c
+                    LEFT JOIN votes v ON c.id = v.candidate_id
+                    GROUP BY c.id
+                `;
 
-                const userDashboard = 'Admin Electoral Dashboard';
-                response.render('admin-dashboard.ejs', {
-                    message: userDashboard,
-                    totalVotes: row,
-                    candidatesData: rows,
-                    LoginedUsername: username,
-                    image: imagePath ? `/uploads/${path.basename(imagePath)}` : null,
-                    pageTitle: 'Dashboard',
-                    moduleName: 'Dashboard'
+                db.all(candidateVotes, [], (err, rows) => {
+                    if(err){
+                        console.error('Error retrieving candidate votes: ', err.message);
+                        return response.status(500).render('admin-dashboard.ejs', { 
+                            message: 'Error loading dashboard', 
+                            totalVoters: row, 
+                            totalVotes: result, 
+                            candidatesData: null,
+                            LoginedUsername: username, 
+                            image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, 
+                            pageTitle: 'Dashboard', 
+                            moduleName: 'Dashboard'
+                        });
+                    }
+
+                    const userDashboard = 'Admin Electoral Dashboard';
+                    response.render('admin-dashboard.ejs', { 
+                        message: userDashboard, 
+                        totalVoters: row, 
+                        totalVotes: result, 
+                        candidatesData: rows, 
+                        LoginedUsername: username, 
+                        image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, 
+                        pageTitle: 'Dashboard', 
+                        moduleName: 'Dashboard'
+                    });
                 });
             });
         });
     } else {
-        response.render('login.ejs', {
-            errorMessage: 'Login failed! Please try again.',
+        response.render('login.ejs', { 
+            errorMessage: 'Login failed! Please try again.', 
             pageTitle: 'Login'
         });
     }
@@ -696,10 +716,20 @@ app.get('/vote', isAuthenticate, (request, response) => {
                     console.log('user has already voted');
                     return response.render('voted.ejs', {contestant: result, LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard', message: 'Welcome to Voter dashboard', pageTitle: 'Dashboard'});
 
-                    //if no error display candidates information in the user dashboard
                 }
-                console.log('All candidates have been displayed');
-                response.render('vote.ejs', {contestant: result, LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard', message: 'Welcome to Voter dashboard', pageTitle: 'Dashboard'});
+
+                 //Query total number of contestants
+
+                 const totalContestant = `SELECT COUNT(*) AS totalResult FROM candidates`
+                 db.get(totalContestant, [], (err, candidateResult) => {
+                    if(err){
+                        console.error(`Error getting total number of candidate: ${err.message}`);
+                    }
+                    console.log('Total candidate: ', candidateResult.totalResult)
+                    //if no error display candidates information in the user dashboard
+                    console.log('All candidates have been displayed');
+                    response.render('vote.ejs', {totalCandidates: candidateResult, contestant: result, LoginedUsername: username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle: 'Dashboard', moduleName: 'Dashboard', message: 'Welcome to Voter dashboard', pageTitle: 'Dashboard'});
+                })
             })}
         
     })
