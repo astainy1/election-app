@@ -1,12 +1,12 @@
 <%- include("./extended-files/_admin-dashboard-header.ejs") -%>
 
 <body class="hold-transition register-page" >
-  <div class=" col-xl-12 col-md-12 col-sm-12 d-flex justify-content-around align-items-center mb-4 ">
+  <div class=" d-sm-inline-block col-xl-12 col-md-12 col-sm-12 d-xl-flex justify-content-around align-items-start mb-4 ">
     <!-- <div class="register-logo">
       <a href="/register"><b>Voting</b> System</a>
     </div> -->
   
-    <div class="card-container card">
+    <div class="card-container card my-5">
       <div class="card-body register-card-body col-12">
 
             <h3 class="text-center"><b>Party</b> Registration</h3>
@@ -16,14 +16,14 @@
             <div class="card-body">
               <div class="form-group">
                 <label for="first-name">Party Name</label>
-                <input type="text" name="partyName" class="form-control" id="party-name" placeholder="Enter Party Name">
+                <input type="text" name="partyName" class="form-control" id="party-name" placeholder="Enter Party Name" required aria-required="true">
               </div>
 
               <div class="form-group">
                 <label for="file">Party Logo</label>
                 <div class="input-group">
                   <div class="custom-file">
-                    <input type="file" name="logo" class="custom-file-input inputImage"  id="file">
+                    <input type="file" name="logo" class="custom-file-input inputImage"  id="file" required aria-required="true">
                     <label class="custom-file-label imageName" for="file">Choose Logo</label>
                   </div>
                 </div>
@@ -66,33 +66,19 @@
               </tr>
             </tfoot>
               <tbody>
+                
+                <% parties.forEach( (partyDetails) => { %>
                 <tr>
-                  <td><img src="./uploads/pngegg.png" class=" img-fluid rounded-circle img-thumbnail" alt="voter picture" style="max-width: 50px; max-height: 50px; object-fit: cover;"></td>
-                  <td>CAH</td>
+                  <td><img src="<%= partyDetails.logo ? '/' + partyDetails.logo : './uploads/pngegg.png' %>" class=" img-fluid rounded-circle img-thumbnail" alt="voter picture" style="max-width: 50px; max-height: 50px; object-fit: cover;"></td>
+                  <td><%= partyDetails.party %></td>
                   <td>Christian A. Harris</td>
                   <td>
                       <button type="button" class="btn btn-success">Edit</button>
                       <button type="button" class="btn btn-danger">Delete</button>
                   </td>
                 </tr>
-                <tr>
-                  <td><img src="./uploads/pngegg.png" class=" img-fluid rounded-circle img-thumbnail" alt="voter picture" style="max-width: 50px; max-height: 50px; object-fit: cover;"></td>
-                  <td>CAH</td>
-                  <td>Christian A. Harris</td>
-                  <td>
-                      <button type="button" class="btn btn-success">Edit</button>
-                      <button type="button" class="btn btn-danger">Delete</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td><img src="./uploads/pngegg.png" class=" img-fluid rounded-circle img-thumbnail" alt="voter picture" style="max-width: 50px; max-height: 50px; object-fit: cover;"></td>
-                  <td>CAH</td>
-                  <td>Christian A. Harris</td>
-                  <td>
-                      <button type="button" class="btn btn-success">Edit</button>
-                      <button type="button" class="btn btn-danger">Delete</button>
-                  </td>
-                </tr>
+                <% }) %>
+            
               </tbody>
           </table>
         </div>

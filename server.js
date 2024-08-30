@@ -119,7 +119,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/public', express.static('public'));
 
-// Serve static files like images
+
 
 
 
@@ -564,7 +564,17 @@ app.get('/party', isAuthenticate, (request, response) => {
     //Get image path
     const imagePath = request.session.imagePath;
 
-    response.render('party-registration.ejs', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'})
+    //Query all data from party table
+    const parties = `SELECT * FROM parties`;
+
+    db.all(parties, (err, rows) => {
+        if(err){
+            console.error(`Error retrieving parties from table: ${err.message}`);
+        }console.log(`Successfully retrieved all parties: ${rows}`)
+        response.render('party-registration.ejs', {parties: rows, LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'})
+
+    })
+
 
 });
 

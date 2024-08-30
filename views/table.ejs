@@ -26,19 +26,25 @@
 
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
-
-                    <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800 font-weight-light-bold p-3 my-4 display-4">Voters Table</h1>
-                    <p class="mb-4"> This is DataTables plugin that is used to generate the demo table below.
-                       <a target="_blank"
-                            href="https://datatables.net">official DataTables documentation
-                        </a>.
-                    </p>
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-2 text-gray-800 font-weight-light-bold p-3 my-4 display-4">Voters Table</h1>
+                        <div>
+                            <button type="button" class=" d-sm-inline-block btn btn-sm shadow-sm px-5 py-2 mr-4 btn-success" data-toggle="modal" data-target="#addVoterModal"><i
+                                    class="fas fa-user-plus fa-sm "> </i> &nbsp; Register New Voter 
+                            </button>
+                            <a href="#" class="d-none d-sm-inline-block btn btn-sm shadow-sm px-5 py-2 mr-4 btn-success"><i
+                                    class="fas fa-download fa-sm "></i> Print 
+                            </a>
+    
+                        </div>
+                    </div>
+                    
+                    <p class="mb-4"> This is the voters table where all qualified voters information are displayed, it and can be printed out for verification.</p>
 
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Voters Data Table</h6>
+                            <h6 class="m-0 font-weight-bold text-gray-800">Voters Data Table</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -72,13 +78,21 @@
                                     <tbody>
                                         <% totalVoterList.forEach( (voter) => { %>
                                         <tr>
-                                            <td><img src="<%= voter.photo ? '/' + voter.photo : './uploads/pngegg.png' %>" class=" img-fluid rounded-circle img-thumbnail" alt="voter picture" style="max-width: 50px; max-height: 50px; object-fit: contain;"></td>
+                                            <td><img src="<%= voter.photo ? '/' + voter.photo : './uploads/pngegg.png' %>" class=" img-fluid img-thumbnail" alt="voter picture" style="max-width: 50px; max-height: 50px; object-fit: cover;"></td>
                                             <td><%= voter.fname %></td>
                                             <td><%= voter.mname %></td>
                                             <td><%= voter.lname %></td>
                                             <td><%= voter.username %></td>
                                             <td><%= voter.dob %></td>
-                                            <td>61</td>
+                                            <!-- Calculate voter age -->
+                                            <% let currentDate = new Date(); %>
+                                            <% let currentYear = currentDate.getFullYear(); %>
+                                            <% let currentDOB = voter.dob; %>
+                                            <% let splitDOB = currentDOB.split('-'); %>
+                                            <% voterCurrentAge = splitDOB[0] - currentYear %>
+
+                                            <td><%= voterCurrentAge %></td>
+
                                             <% if(voter.voted === 'Has Voted') { %>
                                             <td class="text-success"> <%= voter.voted %> <i class="fas fa-check-circle"></i></td>
                                             <% } else { %>

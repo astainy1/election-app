@@ -37,6 +37,88 @@
         </div>
     </div>
 </div>
+
+
+<!-- Add voter Modal-->
+<div class="modal fade" id="addVoterModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Voter Registration Form</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="/" method="post" role="form" id="registrationForm" enctype="multipart/form-data">
+                      <span class="text-danger d-block text-center mt-2 p-0 "></span> 
+
+                    <!-- /.card-body -->
+                    <div class="card-body">
+                      <div class="form-group">
+                        <label for="first-name">First Name</label>
+                        <input type="text" name="fName" class="form-control" id="first-name" placeholder="Enter First Name">
+                      </div>
+          
+                      <div class="form-group">
+                        <label for="middle-name">Middle Name</label>
+                        <input type="text" name="mName" class="form-control" id="middle-name"  placeholder="Enter Middle Name">
+                      </div>
+          
+                      <div class="form-group">
+                        <label for="last-name">Last Name</label>
+                        <input type="text" name="lName" class="form-control" id="last-name" placeholder="Enter Last Name">
+                      </div>
+          
+                      <div class="form-group">
+                        <label for="dob" class="label">Date of Birth</label>
+                          <input type="date" name="dob" id="dob" class="form-control" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" data-mask>
+          
+                        <!-- /.input group -->
+                      </div>
+          
+                      <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" name="username" class="form-control" id="username" placeholder="Enter username">
+                      </div>
+          
+                      <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" name="password" class="form-control"  id="password" placeholder="Password">
+                      </div>
+          
+                      <div class="form-group">
+                        <label for="file">Image</label>
+                        <div class="input-group">
+                          <div class="custom-file">
+                            <input type="file" name="photo" class="custom-file-input inputImage"  id="file">
+                            <label class="custom-file-label imageName" for="file">Choose image</label>
+                          </div>
+                        </div>
+                      </div>
+          
+                      <div class="form-group">
+                          <div class="input-group">
+                              <select name="role" class="form-select" aria-label="Default select">
+                                  <option class="border border-secondary" selected>Select role</option>
+                                  <option name="role">Voter</option>
+          
+                              </select>
+                          </div>
+                      </div>
+                    <!-- Form elements end! -->
+          
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                <a class="btn btn-primary" href="/vote-list">Add Voter</a>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- External Script -->
 <script src="./assets/js/js/main.js"></script> 
 <!-- Bootstrap core JavaScript-->
