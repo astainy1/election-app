@@ -89,7 +89,7 @@
                                             <% let currentYear = currentDate.getFullYear(); %>
                                             <% let currentDOB = voter.dob; %>
                                             <% let splitDOB = currentDOB.split('-'); %>
-                                            <% voterCurrentAge = splitDOB[0] - currentYear %>
+                                            <% voterCurrentAge = currentYear -splitDOB[0] %>
 
                                             <td><%= voterCurrentAge %></td>
 
