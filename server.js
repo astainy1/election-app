@@ -907,28 +907,40 @@ app.get('/edit-candidate/:id', isAuthenticate, (request, response) => {
             return response.status(500).send('Error retrieving candidate.');
         }
 
-        response.render('edit-candidate.ejs', { candidate });
+        console.log(`Candidate edit data: ${candidate}`)
+        response.render('contestants.ejs', {candidate, allCandidate: candidateDetails,
+            module: candidateRole,
+            positionModel: allPosition,
+            partiesModel: allParties,
+            LoginedUsername: request.session.username,
+            image: imagePath ? `/uploads/${path.basename(imagePath)}` : null,
+            pageTitle: '',
+            moduleName: 'Contestants'});
     });
 });
 
 // Edit Candidate Route (POST)
 app.post('/edit-candidate/:id', isAuthenticate, (request, response) => {
     const candidateId = request.params.id;
-    const { fName, mName, lName, position, party } = request.body;
+    const { fName, mName, lName, username, party, position } = request.body;
 
-    const updateCandidateQuery = `UPDATE candidates SET fname = ?, mname = ?, lname = ?, position_id = ?, party_id = ? WHERE id = ?`;
-    const values = [fName, mName, lName, position, party, candidateId];
+    const updateCandidateQuery = `
+        UPDATE candidates
+        SET fname = ?, mname = ?, lname = ?, username = ?, party_id = ?, position_id = ?
+        WHERE id = ?
+    `;
+    const updateValues = [fName, mName, lName, username, party, position, candidateId];
 
-    db.run(updateCandidateQuery, values, function(err) {
+    db.run(updateCandidateQuery, updateValues, (err) => {
         if (err) {
             console.error(`Error updating candidate with ID ${candidateId}: ${err.message}`);
             return response.status(500).send('Error updating candidate.');
         }
 
-        console.log(`Candidate with ID ${candidateId} updated successfully.`);
-        response.redirect('/contestants');
+        response.redirect('/contestants'); // Redirect back to the contestants list or any other page
     });
 });
+
 
 
 // Delete Candidate Route (POST)
@@ -961,7 +973,7 @@ app.get('/edit-voter/:id', isAuthenticate, (request, response) => {
             return response.status(500).send('Error retrieving voter.');
         }
 
-        response.render('edit-voter.ejs', { voter });
+        response.render('/vote-list', { voter });
     });
 });
 
@@ -980,7 +992,7 @@ app.post('/edit-voter/:id', isAuthenticate, (request, response) => {
         }
 
         console.log(`Voter with ID ${voterId} updated successfully.`);
-        response.redirect('/voters');
+        response.redirect('/vote-list');
     });
 });
 

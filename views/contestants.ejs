@@ -11,20 +11,6 @@
           <!-- Main Content -->
           <div id="content">
 
-                  <!-- Topbar Search
-                  <form
-                      class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-                      <div class="input-group">
-                          <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
-                              aria-label="Search" aria-describedby="basic-addon2">
-                          <div class="input-group-append">
-                              <button class="btn btn-primary" type="button">
-                                  <i class="fas fa-search fa-sm"></i>
-                              </button>
-                          </div>
-                      </div>
-                  </form> -->
-
               <!-- Begin Page Content -->
               <div class="container-fluid">
                   <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -75,9 +61,9 @@
                                       </tr>
                                   </tfoot>
                                   <tbody>
-                                    <% allCandidate.forEach( (candidate) => {%>
+                                    <% allCandidate.forEach(candidate => { %>
                                       <tr>
-                                          <td><img src="<%= candidate.photo ? '/' + candidate.photo : './uploads/contestants/default-president.png' %>" class=" img-fluid img-thumbnail" alt="voter picture" style="max-width: 50px; max-height: 50px; object-fit: cover;"></td>
+                                          <td><img src="<%= candidate.photo ? '/' + candidate.photo : './uploads/contestants/default-president.png' %>" class=" img-fluid img-thumbnail" alt="candidate picture" style="max-width: 50px; max-height: 50px; object-fit: cover;"></td>
                                           <td><%= candidate.fname %></td>
                                           <td><%= candidate.mname %></td>
                                           <td><%= candidate.lname %></td>
@@ -86,9 +72,9 @@
                                           <td><%= candidate.position_id %></td>
                                           <td>
                                              <!-- Edit Button -->
-                                             <form action="/edit-candidate/<%= candidate.id %>" method="GET" style="display:inline;">
-                                                <button type="submit" class="btn btn-success">Edit</button>
-                                            </form>
+                                             <button type="button" class="btn btn-success" data-toggle="modal" data-target="#editCandidateModal<%= candidate.id %>">
+                                                Edit 
+                                            </button>
                                         
                                             <!-- Delete Button -->
                                             <form action="/delete-candidate/<%= candidate.id %>" method="POST" onsubmit="return confirm('Are you sure you want to delete this candidate?');" style="display:inline;">
@@ -108,6 +94,9 @@
 
           </div>
           <!-- End of Main Content -->
+      </div>
+      <!-- End of Content Wrapper -->
 
- 
-<%- include("./extended-files/_dashboard-footer.ejs")-%>
+  </div>
+  <!-- End of Page Wrapper -->
+
