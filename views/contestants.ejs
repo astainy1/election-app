@@ -19,7 +19,7 @@
                           <button type="button" class=" d-sm-inline-block btn btn-sm shadow-sm px-5 py-2 mr-4 btn-success" data-toggle="modal" data-target="#contestantModal">
                             <i class="fas fa-user-plus fa-sm "> </i> &nbsp; Add Contestant 
                           </button>
-                          <a href="#" class="d-none d-sm-inline-block btn btn-sm shadow-sm px-5 py-2 mr-4 btn-success" onclick="alert('unable to print document for now. Please contact system develper.');">
+                          <a href="#" class="d-none d-sm-inline-block btn btn-sm shadow-sm px-5 py-2 mr-4 btn-success" onclick="window.print();">
                             <i class="fas fa-download fa-sm "></i> Print 
                           </a>
   
@@ -38,6 +38,7 @@
                               <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                   <thead>
                                       <tr>
+                                        <th>No.</th>
                                         <th>Photo</th>
                                         <th>First Name</th>
                                         <th>Middle Name</th>
@@ -50,6 +51,7 @@
                                   </thead>
                                   <tfoot>
                                       <tr>
+                                           <th>No.</th>
                                           <th>Photo</th>
                                           <th>First Name</th>
                                           <th>Middle Name</th>
@@ -63,6 +65,7 @@
                                   <tbody>
                                     <% allCandidate.forEach(candidate => { %>
                                       <tr>
+                                          <td><%= candidate.id %></td>
                                           <td><img src="<%= candidate.photo ? '/' + candidate.photo : './uploads/contestants/default-president.png' %>" class=" img-fluid img-thumbnail" alt="candidate picture" style="max-width: 50px; max-height: 50px; object-fit: cover;"></td>
                                           <td><%= candidate.fname %></td>
                                           <td><%= candidate.mname %></td>
@@ -72,7 +75,7 @@
                                           <td><%= candidate.position_id %></td>
                                           <td>
                                              <!-- Edit Button -->
-                                             <button type="button" class="btn btn-success" data-toggle="modal" data-target="#editCandidateModal<%= candidate.id %>">
+                                             <button type="button" class="btn btn-success" data-toggle="modal" data-target="#editCandidateModal<%= candidate.id %>" onclick="alert('Data cannot be edited for now.')">
                                                 Edit 
                                             </button>
                                         
@@ -100,3 +103,4 @@
   </div>
   <!-- End of Page Wrapper -->
 
+  <%- include("./extended-files/_dashboard-footer.ejs") -%>

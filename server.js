@@ -627,7 +627,9 @@ app.get('/party', isAuthenticate, (request, response) => {
     db.all(parties, (err, rows) => {
         if(err){
             console.error(`Error retrieving parties from table: ${err.message}`);
-        }console.log(`Successfully retrieved all parties: ${rows}`)
+        }rows.forEach((parties) => {
+            console.log(`Successfully retrieved all parties: ${parties.party}`)
+        })
         response.render('party-registration.ejs', {module: '', positionModel: '', partiesModel: '', parties: rows, LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'})
 
     })
@@ -759,13 +761,6 @@ app.get('/vote-list', isAuthenticate, (request, response) => {
         })
 })
 
-// //Vote list - Post Route
-// app.post('/vote-list', (request, response) => {
-//     const imagePath = request.session.imagePath;
-//     response.redirect('/voter-list', {LoginedUsername: request.session.username, image: imagePath ? `/uploads/${path.basename(imagePath)}` : null, pageTitle : '', moduleName : 'Contestants'});
-// });
-
-
 
 //users - Get Route
 app.get('/users', isAuthenticate, (request, response) => {
@@ -890,7 +885,7 @@ app.post('/vote', (request, response) => {
         }
 
     })
-        //If the loggined user has already voted, display has already voted to such user.
+
 
 });
 
@@ -941,8 +936,6 @@ app.post('/edit-candidate/:id', isAuthenticate, (request, response) => {
     });
 });
 
-
-
 // Delete Candidate Route (POST)
 app.post('/delete-candidate/:id', isAuthenticate, (request, response) => {
     const candidateId = request.params.id;
@@ -959,7 +952,6 @@ app.post('/delete-candidate/:id', isAuthenticate, (request, response) => {
         response.redirect('/contestants');
     });
 });
-
 
 // Edit Voter Route (GET)
 app.get('/edit-voter/:id', isAuthenticate, (request, response) => {
@@ -1014,10 +1006,23 @@ app.post('/delete-voter/:id', isAuthenticate, (request, response) => {
     });
 });
 
+// Delete Party Route (POST)
+app.post('/delete-party/:id', isAuthenticate, (request, response) => {
+    const partyId = request.params.id;
+    console.log(`party id: ${partyId}`)
 
+    const deletePartyQuery = `DELETE FROM parties WHERE id = ?`;
 
+    db.run(deletePartyQuery, partyId, function(err) {
+        if (err) {
+            console.error(`Error deleting party with ID ${partyId}: ${err.message}`);
+            return response.status(500).send('Error deleting party.');
+        }
 
-
+        console.log(`Party with ID ${partyId} deleted successfully.`);
+        response.redirect('/party');
+    });
+});
 
 
 //404 route

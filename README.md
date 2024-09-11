@@ -17,6 +17,16 @@ After installation, run `npm install` and then run `npm start` which will open u
 
 You must have npm installed globally in order to use this build environment. This project was built using **node v10.7.0**
 
+**[Login credentials]**
+
+1. Admin
+    username: admin
+    password: 123456
+
+2. Voter
+    username: hawa
+    password: 1234567
+
 ## Bugs and Issues
 
 Have a bug or an issue with this project? [Open a new issue](https://github.com/astainy1/election-app/issues) here on GitHub or **[send me a mail](astainyharris1@gmail.com)**.
@@ -25,7 +35,7 @@ Have a bug or an issue with this project? [Open a new issue](https://github.com/
 
 Elections App is a practice project developed during my study at Orange Digital Center [ODC] Nodejs Fullstack Web Development Training. This project was built using the following technology
 
-* --- *[Front End]* ---
+* --- **[Front End]** ---
 * EJS - JavaScript templating engine
 * CSS
 * Bootstrap - CSS Library

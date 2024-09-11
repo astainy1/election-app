@@ -26,13 +26,13 @@
 
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
-                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                    <div class="d-sm-flex align-items-center justify-content-between mb-2">
                         <h1 class="h3 mb-2 text-gray-800 font-weight-light-bold p-3 my-4 display-4">Voters Table</h1>
                         <div>
                             <button type="button" class=" d-sm-inline-block btn btn-sm shadow-sm px-5 py-2 mr-4 btn-success" data-toggle="modal" data-target="#addVoterModal"><i
                                     class="fas fa-user-plus fa-sm "> </i> &nbsp; Register New Voter 
                             </button>
-                            <a href="#" class="d-none d-sm-inline-block btn btn-sm shadow-sm px-5 py-2 mr-4 btn-success"><i
+                            <a href="#" class="d-none d-sm-inline-block btn btn-sm shadow-sm px-5 py-2 mr-4 btn-success" onclick="window.print();"><i
                                     class="fas fa-download fa-sm "></i> Print 
                             </a>
     
@@ -51,6 +51,7 @@
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
+                                            <th>No.</th>
                                             <th>Photo</th>
                                             <th>First Name</th>
                                             <th>Middle Name</th>
@@ -64,6 +65,7 @@
                                     </thead>
                                     <tfoot>
                                         <tr>
+                                            <th>No.</th>
                                             <th>Photo</th>
                                             <th>First Name</th>
                                             <th>Middle Name</th>
@@ -78,6 +80,7 @@
                                     <tbody>
                                         <% totalVoterList.forEach( (voter) => { %>
                                         <tr>
+                                            <td><%= voter.id %></td>
                                             <td><img src="<%= voter.photo ? '/' + voter.photo : './uploads/pngegg.png' %>" class=" img-fluid img-thumbnail" alt="voter picture" style="max-width: 50px; max-height: 50px; object-fit: cover;"></td>
                                             <td><%= voter.fname %></td>
                                             <td><%= voter.mname %></td>
@@ -99,18 +102,15 @@
                                             <td class="text-danger"> <%= voter.voted %> <i class="fas fa-times-circle"></i></td>
                                             <% } %>
                                             <td>
-                                                <td>
                                                     <!-- Edit Button -->
-                                                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#editVoterModal<%= voter.id %>">
+                                                    <button type="button" class="btn-sm  btn btn-success" data-toggle="modal" data-target="#editVoterModal<%= voter.id %>" onclick="alert('Data cannot be edited for now.')">
                                                         Edit
                                                     </button>
                                                 
                                                     <!-- Delete Button -->
                                                     <form action="/delete-voter/<%= voter.id %>" method="POST" onsubmit="return confirm('Are you sure you want to delete this candidate?');" style="display:inline;">
-                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                        <button type="submit" class=" btn-sm btn btn-danger">Delete</button>
                                                     </form>
-                                                </td>
-                                                
                                             </td>
                                         </tr>
                                         <% }) %>
