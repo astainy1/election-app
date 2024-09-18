@@ -28,7 +28,7 @@ To begin using this system, choose one of the following options to get started:
 
 ## Usage
 
-After installation, run `npm install` and then run `npm start` which will open up the project on [(http://localhost:500)] in your default browser, watch for changes to core project files, and live reload the browser when changes are saved.
+After installation, run `npm install` and then run `npm start` which will open up the project on [(http://localhost:5000)] in your default browser, watch for changes to core project files, and live reload the browser when changes are saved.
 
 You must have npm installed globally in order to use this build environment. This project was built using **node v10.7.0**
 
