@@ -1,7 +1,7 @@
 # [Voting App -  By Astainy]
 
 ## Preview
-
+[![Voting App Preview] (https://github.com/astainy1/election-app/blob/main/public/assets/img/dashboard.PNG)](https://github.com/astainy1/election-app)
 ## Status
 
 ## Download and Installation
