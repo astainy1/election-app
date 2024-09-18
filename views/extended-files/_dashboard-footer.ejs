@@ -1,10 +1,10 @@
 <!-- Footer -->
 <footer class="sticky-footer bg-white">
-  <div class="container my-auto">
-      <div class="copyright text-center my-auto">
-          <span>Copyright &copy; Voting App 2024</span>
-      </div>
-  </div>
+    <div class="container my-auto">
+        <div class="copyright text-center my-auto">
+            <span>Copyright &copy; Voting App 2024</span>
+        </div>
+    </div>
 </footer>
 <!-- End of Footer -->
 
@@ -15,167 +15,194 @@
 <!-- End of Page Wrapper -->
 <!-- Scroll to Top Button -->
 <a class="scroll-to-top rounded" href="#page-top">
-  <i class="fas fa-angle-up"></i>
+    <i class="fas fa-angle-up"></i>
 </a>
 
 <!-- Logout Modal -->
-<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h5 class="modal-title" id="logoutModalLabel">Ready to Leave?</h5>
-              <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">×</span>
-              </button>
-          </div>
-          <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-          <div class="modal-footer">
-              <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-              <a class="btn btn-primary" href="/logout">Logout</a>
-          </div>
-      </div>
-  </div>
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logoutModalLabel">Ready to Leave?</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                <a class="btn btn-primary" href="/logout">Logout</a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Contestant Modal -->
-<div class="modal fade" id="contestantModal" tabindex="-1" role="dialog" aria-labelledby="contestantModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h5 class="modal-title" id="contestantModalLabel">Contestant Registration Form</h5>
-              <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">×</span>
-              </button>
-          </div>
-          <div class="modal-body">
-              <form action="/contestants" method="post" role="form" id="registrationForm" enctype="multipart/form-data">
-                  <span class="text-danger d-block text-center mt-2 p-0"></span>
-                  <div class="card-body">
-                      <div class="form-group">
-                          <label for="first-name">First Name</label>
-                          <input type="text" name="fName" class="form-control" id="first-name" placeholder="Enter First Name">
-                      </div>
-                      <div class="form-group">
-                          <label for="middle-name">Middle Name</label>
-                          <input type="text" name="mName" class="form-control" id="middle-name" placeholder="Enter Middle Name">
-                      </div>
-                      <div class="form-group">
-                          <label for="last-name">Last Name</label>
-                          <input type="text" name="lName" class="form-control" id="last-name" placeholder="Enter Last Name">
-                      </div>
-                      <select name="party" class="form-select">
+<div class="modal fade" id="contestantModal" tabindex="-1" role="dialog" aria-labelledby="contestantModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contestantModalLabel">Contestant Registration Form</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="/contestants" method="post" role="form" id="registrationForm"
+                    enctype="multipart/form-data">
+                    <span class="text-danger d-block text-center mt-2 p-0"></span>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="first-name">First Name</label>
+                            <input type="text" name="fName" class="form-control" id="first-name"
+                                placeholder="Enter First Name">
+                        </div>
+                        <div class="form-group">
+                            <label for="middle-name">Middle Name</label>
+                            <input type="text" name="mName" class="form-control" id="middle-name"
+                                placeholder="Enter Middle Name">
+                        </div>
+                        <div class="form-group">
+                            <label for="last-name">Last Name</label>
+                            <input type="text" name="lName" class="form-control" id="last-name"
+                                placeholder="Enter Last Name">
+                        </div>
+                        <select name="party" class="form-select">
                             <option selected> Select position </option>
-                        <% for( const candidatePosition of positionModel)  { %>
-                            <option name="party"><%= candidatePosition.position %></option>
-                        <% } %>
-                          <!-- Options would be dynamically added here -->
-                      </select>
+                            <% for( const candidatePosition of positionModel) { %>
+                                <option name="party">
+                                    <%= candidatePosition.position %>
+                                </option>
+                                <% } %>
+                                    <!-- Options would be dynamically added here -->
+                        </select>
 
-                      <div class="form-group">
-                          <label for="username">Username</label>
-                          <input type="text" name="username" class="form-control" id="username" placeholder="Enter username">
-                      </div>
-                      <div class="form-group">
-                          <label for="password">Password</label>
-                          <input type="password" name="password" class="form-control" id="password" placeholder="Password">
-                      </div>
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" name="username" class="form-control" id="username"
+                                placeholder="Enter username">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" name="password" class="form-control" id="password"
+                                placeholder="Password">
+                        </div>
 
-                      <select name="position" class="form-select">
-                          <option selected>Select party </option>
-                        <% for(const candidateParty of partiesModel) { %>
-                            <option name="position"><%= candidateParty.party %></option>
-                        <% } %>
-                          <!-- Options would be dynamically added here -->
-                      </select>
+                        <select name="position" class="form-select">
+                            <option selected>Select party </option>
+                            <% for(const candidateParty of partiesModel) { %>
+                                <option name="position">
+                                    <%= candidateParty.party %>
+                                </option>
+                                <% } %>
+                                    <!-- Options would be dynamically added here -->
+                        </select>
 
-                      <div class="form-group">
-                          <label for="file">Image</label>
-                          <div class="input-group">
-                              <div class="custom-file">
-                                  <input type="file" name="contestants-photo" class="custom-file-input candidateInputImage" id="candidateFile">
-                                  <label class="custom-file-label candidateImageName" for="file">Choose image</label>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-                  <div class="modal-footer">
-                      <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                      <button type="submit" class="btn btn-primary" id="submit" name="addvoter">Add Contestant</button>
-                  </div>
-              </form>
-          </div>
-      </div>
-  </div>
-</div>
-
-<!-- Add Voter Modal -->
-<div class="modal fade" id="addVoterModal" tabindex="-1" role="dialog" aria-labelledby="addVoterModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h5 class="modal-title" id="addVoterModalLabel">Voter Registration Form</h5>
-              <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">×</span>
-              </button>
-          </div>
-          <div class="modal-body">
-              <!-- form or content for voter registration here -->
-              <form action="/vote-list" method="post" role="form" id="registrationForm" enctype="multipart/form-data">
-                <span class="text-danger d-block text-center mt-2 p-0"></span>
-                <div class="card-body">
-                    <div class="form-group">
-                        <label for="first-name">First Name</label>
-                        <input type="text" name="fName" class="form-control" id="first-name" placeholder="Enter First Name">
-                    </div>
-                    <div class="form-group">
-                        <label for="middle-name">Middle Name</label>
-                        <input type="text" name="mName" class="form-control" id="middle-name" placeholder="Enter Middle Name">
-                    </div>
-                    <div class="form-group">
-                        <label for="last-name">Last Name</label>
-                        <input type="text" name="lName" class="form-control" id="last-name" placeholder="Enter Last Name">
-                    </div>
-                    <div class="form-group">
-                        <label for="dob">Date of Birth</label>
-                        <input type="date" name="dob" id="dob" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label for="username">Username</label>
-                        <input type="text" name="username" class="form-control" id="username" placeholder="Enter username">
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" name="password" class="form-control" id="password" placeholder="Password">
-                    </div>
-                    <div class="form-group">
-                        <label for="file">Image</label>
-                        <div class="input-group">
-                            <div class="custom-file">
-                                <input type="file" name="photo" class="custom-file-input voterInputImage" id="voterFile">
-                                <label class="custom-file-label voterImageName" for="file">Choose image</label>
+                        <div class="form-group">
+                            <label for="file">Image</label>
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <input type="file" name="contestants-photo"
+                                        class="custom-file-input candidateInputImage" id="candidateFile">
+                                    <label class="custom-file-label candidateImageName" for="file">Choose image</label>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                      <select name="role" class="form-select">
-                          <% for(const voterRole of module) { %>
-                          <option name="role"><%= voterRole.role %></option>
-                          <% } %>
-                        </select>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="submit" name="addvoter">Add
+                            Contestant</button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="submit" name="addvoter">Add Voter</button>
-                </div>
-            </form>
-          </div>
-      </div>
-  </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Voter Modal -->
+<div class="modal fade" id="addVoterModal" tabindex="-1" role="dialog" aria-labelledby="addVoterModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addVoterModalLabel">Voter Registration Form</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- form or content for voter registration here -->
+                <form action="/vote-list" method="post" role="form" id="registrationForm" enctype="multipart/form-data">
+                    <span class="text-danger d-block text-center mt-2 p-0"></span>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="first-name">First Name</label>
+                            <input type="text" name="fName" class="form-control" id="first-name"
+                                placeholder="Enter First Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="middle-name">Middle Name</label>
+                            <input type="text" name="mName" class="form-control" id="middle-name"
+                                placeholder="Enter Middle Name">
+                        </div>
+                        <div class="form-group">
+                            <label for="last-name">Last Name</label>
+                            <input type="text" name="lName" class="form-control" id="last-name"
+                                placeholder="Enter Last Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dob">Date of Birth</label>
+                            <input type="date" name="dob" id="dob" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" name="username" class="form-control" id="username"
+                                placeholder="Enter username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" name="password" class="form-control" id="password"
+                                placeholder="Password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="file">Image</label>
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <input type="file" name="photo" class="custom-file-input voterInputImage"
+                                        id="voterFile">
+                                    <label class="custom-file-label voterImageName" for="file">Choose image</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <select name="role" class="form-select" required>
+                                <option value="">
+                                    --Select Role--
+                                </option>
+                                <% for (const voterRole of module) { %>
+                                    <option value="<%= voterRole.role %>">
+                                        <%= voterRole.role %>
+                                    </option>
+                                    <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="submit" name="addvoter">Add Voter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Edit Candidate Modal -->
-<div class="modal fade" id="editCandidateModal>" tabindex="-1" role="dialog" aria-labelledby="editCandidateModalLabel" aria-hidden="true">
+<div class="modal fade" id="editCandidateModal>" tabindex="-1" role="dialog" aria-labelledby="editCandidateModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -221,7 +248,8 @@
 </div>
 
 <!-- Edit Voter Modal -->
-<div class="modal fade" id="editVoterModal" tabindex="-1" role="dialog" aria-labelledby="editVoterModalLabel" aria-hidden="true">
+<div class="modal fade" id="editVoterModal" tabindex="-1" role="dialog" aria-labelledby="editVoterModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -260,7 +288,7 @@
 
 
 <!-- External Script -->
-<script src="./assets/js/js/main.js"></script> 
+<script src="./assets/js/js/main.js"></script>
 <!-- Bootstrap core JavaScript -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -284,4 +312,5 @@
 <!-- Toastr -->
 <script src="./assets/vendor/toastr/toastr.min.js"></script>
 </body>
+
 </html>

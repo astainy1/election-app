@@ -9,29 +9,59 @@
     <meta name="description" content="">
     <meta name="author" content="Christian A. Harris">
 
-    <title><%= pageTitle %></title>
+    <title>
+        <%= pageTitle %>
+    </title>
 
     <!-- Custom fonts for this template-->
     <link href="./assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
-      <!-- SweetAlert2 -->
+    <!-- SweetAlert2 -->
     <link rel="stylesheet" href="./assets/vendor/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
     <!-- Toastr -->
     <link rel="stylesheet" href="./assets/vendor/toastr/toastr.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Custom styles for this template-->
     <link href="./assets/css/sb-admin-2.min.css" rel="stylesheet">
 
-<style>
-    .voterPicture{
-        max-width: 50px;
-        max-height: 50px;
-        object-fit: cover;
-    }
-</style>
+    <style>
+        .voterPicture {
+            max-width: 50px;
+            max-height: 50px;
+            object-fit: cover;
+        }
+
+        @media only print {
+            .navbar-nav {
+                display: none;
+            }
+
+            button {
+                display: none;
+            }
+
+            footer {
+                display: none;
+            }
+
+            #accordionSider {
+                display: none;
+            }
+
+            ul {
+                display: none;
+            }
+
+            #voterTable {
+                box-shadow: none;
+            }
+        }
+    </style>
 </head>
 
 <body id="page-top">
@@ -39,13 +69,13 @@
     <!-- Page Wrapper -->
     <div id="wrapper">
 
-       <%- include("_admin-sidebar-nav.ejs")-%>
-        <!-- End of Sidebar -->
+        <%- include("_admin-sidebar-nav.ejs")-%>
+            <!-- End of Sidebar -->
 
-        <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column">
+            <!-- Content Wrapper -->
+            <div id="content-wrapper" class="d-flex flex-column">
 
-            <!-- Main Content -->
-            <div id="content">
+                <!-- Main Content -->
+                <div id="content">
 
-                <%- include("_topbar-nav.ejs") -%>
+                    <%- include("_topbar-nav.ejs") -%>

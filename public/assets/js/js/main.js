@@ -1,6 +1,6 @@
 
-const voterImage = document.querySelector('.candidateInputImage');
-const voterImageName = document.querySelector('.candidateImageName');
+const voterImage = document.querySelector('.voterInputImage');
+const voterImageName = document.querySelector('.voterImageName');
 
 const candidateImage = document.querySelector('.candidateInputImage');
 const candidateImageName = document.querySelector('.voterImageName');
@@ -12,26 +12,26 @@ const inputPartyLogo = document.querySelector('.inputPartyLogo');
 
 //display image name uponload
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     voterImage.addEventListener('change', () => {
-        if(voterImage.files.length > 0){
+        if (voterImage.files.length > 0) {
             voterImageName.textContent = voterImage.files[0].name
-        }else{
+        } else {
             voterImageName.textContent = 'Choose image'
         }
     });
 
     voterImage.addEventListener('change', () => {
-        if(voterImage.files.length > 0){
+        if (voterImage.files.length > 0) {
             voterImageName.textContent = voterImage.files[0].name
-        }else{
+        } else {
             voterImageName.textContent = 'Choose image'
         }
     });
     inputPartyLogo.addEventListener('change', () => {
-        if(inputPartyLogo.files.length > 0){
+        if (inputPartyLogo.files.length > 0) {
             partyLogoName.textContent = inputPartyLogo.files[0].name
-        }else{
+        } else {
             partyLogoName.textContent = 'Choose image'
         }
     });
