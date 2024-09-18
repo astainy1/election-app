@@ -35,11 +35,11 @@ You must have npm installed globally in order to use this build environment. Thi
 **[Login credentials]**
 
 1. Admin
-    username: admin
+    username: astainy
     password: 123456
 
 2. Voter
-    username: hawa
+    username: john
     password: 1234567
 
 ## Bugs and Issues
