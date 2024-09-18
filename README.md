@@ -1,7 +1,22 @@
 # [Voting App -  By Astainy]
 
 ## Preview
-[![Voting App Preview] (public/assets/img/dashboard.PNG)](https://github.com/astainy1/election-app)
+
+### Login Page
+![Login](screenshots/login.PNG)
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+### Voter List
+![Candidate](screenshots/voter-list.png)
+
+### Candidate to be Voted
+![Candidate](screenshots/candidate.png)
+
+### Voted Page
+![Voted](screenshots/voted.png)
+
 ## Status
 
 ## Download and Installation
